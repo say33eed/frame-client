@@ -1,4 +1,7 @@
 
+
+import Navbar from "@/components/Navbar";
+
 import { getApiHealth } from "@/lib/api";
 
 export default async function Home() {
@@ -14,33 +17,34 @@ export default async function Home() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center text-black">
-      <h1 className="text-5xl font-semibold tracking-tight">
-        Frame
-      </h1>
+    <>
+      <Navbar />
+      <main className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center text-black">
+        <h1 className="text-5xl font-semibold tracking-tight">
+          Frame
+        </h1>
 
-      <p className="mt-4 text-lg text-neutral-600">
-        Space to create without limits.
-      </p>
-
-      <div className="mt-10 rounded-xl border border-neutral-200 px-6 py-5">
-        <p className="text-sm font-medium text-neutral-500">
-          Backend Connection
+        <p className="mt-4 text-lg text-neutral-600">
+          Space to create without limits.
         </p>
 
-        <p
-          className={`mt-2 text-lg font-semibold ${
-            apiConnected ? "text-green-700" : "text-red-600"
-          }`}
-        >
-          {apiConnected ? "Connected" : "Disconnected"}
-        </p>
+        <div className="mt-10 rounded-xl border border-neutral-200 px-6 py-5">
+          <p className="text-sm font-medium text-neutral-500">
+            Backend Connection
+          </p>
 
-        <p className="mt-2 text-sm text-neutral-600">
-          {apiMessage}
-        </p>
-      </div>
-    </main>
+          <p
+            className={`mt-2 text-lg font-semibold ${apiConnected ? "text-green-700" : "text-red-600"
+              }`}
+          >
+            {apiConnected ? "Connected" : "Disconnected"}
+          </p>
+
+          <p className="mt-2 text-sm text-neutral-600">
+            {apiMessage}
+          </p>
+        </div>
+      </main>
+    </>
   );
 }
-  
