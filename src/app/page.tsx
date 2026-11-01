@@ -1,7 +1,5 @@
-
-
 import Navbar from "@/components/Navbar";
-
+import Hero from "@/components/Hero";
 import { getApiHealth } from "@/lib/api";
 
 export default async function Home() {
@@ -19,6 +17,7 @@ export default async function Home() {
   return (
     <>
       <Navbar />
+      <Hero />
       <main className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center text-black">
         <h1 className="text-5xl font-semibold tracking-tight">
           Frame
