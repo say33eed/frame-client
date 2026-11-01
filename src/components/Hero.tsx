@@ -8,7 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const slides = [
     {
-        image: "/images/hero/hero-studio-1-v1.jpg",
+        image: "/images/hero/hero-studio-1.jpg",
         alt: "Creative photography studio interior",
     },
     {
