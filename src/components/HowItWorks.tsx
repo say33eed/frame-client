@@ -12,7 +12,7 @@ const steps = [
         number: "01",
         title: "Explore",
         description:
-            "Browse creative studios and discover the perfect space for your project.",
+            "Browse creative studios and discover the perfect space for your next creative project.",
         icon: Search,
     },
     {
