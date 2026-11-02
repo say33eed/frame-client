@@ -1,4 +1,6 @@
 
+"use client";
+
 import Link from "next/link";
 
 import {
@@ -8,45 +10,51 @@ import {
     Mic2,
     Music2,
     Paintbrush,
+    PanelsTopLeft,
 } from "lucide-react";
 
+import { useStudioCategories } from "@/hooks/useStudioCategories";
 
-
-const categories = [
-    {
-        name: "Photo Studio",
-        description: "Spaces for portraits, products, and editorial shoots.",
+// These descriptions and icons preserve Frame's existing design.
+// Category names and slugs come from the backend.
+const categoryDesign = {
+    "photo-studio": {
+        description:
+            "Spaces for portraits, products, and editorial shoots.",
         icon: Camera,
-        href: "/studios?category=photo-studio",
     },
-    {
-        name: "Film Stage",
-        description: "Production spaces for film and video projects.",
+    "film-stage": {
+        description:
+            "Production spaces for film and video projects.",
         icon: Clapperboard,
-        href: "/studios?category=film-stage",
     },
-    {
-        name: "Podcast Lounge",
-        description: "Recording spaces for podcasts and conversations.",
+    "podcast-lounge": {
+        description:
+            "Recording spaces for podcasts and conversations.",
         icon: Mic2,
-        href: "/studios?category=podcast-lounge",
     },
-    {
-        name: "Music Suite",
-        description: "Creative environments for music and audio production.",
+    "music-suite": {
+        description:
+            "Creative environments for music and audio production.",
         icon: Music2,
-        href: "/studios?category=music-suite",
     },
-    {
-        name: "Workshop",
-        description: "Flexible spaces for hands-on creative sessions.",
+    workshop: {
+        description:
+            "Flexible spaces for hands-on creative sessions.",
         icon: Paintbrush,
-        href: "/studios?category=workshop",
     },
-];
+};
 
+// Used only when the backend introduces a new category.
+const defaultCategoryDesign = {
+    description:
+        "Discover creative spaces designed for your next project.",
+    icon: PanelsTopLeft,
+};
 
 export default function StudioCategories() {
+    const { categories } = useStudioCategories();
+
     return (
         <section
             id="studio-categories"
@@ -82,15 +90,23 @@ export default function StudioCategories() {
                     </Link>
                 </div>
 
-
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                     {categories.map((category) => {
-                        const Icon = category.icon;
+                        const design =
+                            categoryDesign[
+                            category.slug as keyof typeof categoryDesign
+                            ] ?? defaultCategoryDesign;
+
+                        const Icon = design.icon;
+
+                        const href = `/studios?category=${encodeURIComponent(
+                            category.slug
+                        )}`;
 
                         return (
                             <Link
-                                key={category.name}
-                                href={category.href}
+                                key={category.slug}
+                                href={href}
                                 className="group flex min-h-64 flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023]"
                             >
                                 <div className="flex items-start justify-between">
@@ -111,7 +127,7 @@ export default function StudioCategories() {
                                     </h3>
 
                                     <p className="mt-2 text-sm leading-relaxed text-neutral-500">
-                                        {category.description}
+                                        {design.description}
                                     </p>
                                 </div>
                             </Link>
