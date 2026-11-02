@@ -1,35 +1,47 @@
 
 import Link from "next/link";
+
 import {
     ArrowUpRight,
+    CalendarClock,
     CalendarCheck,
     Clapperboard,
     Search,
 } from "lucide-react";
 
+
+
 const steps = [
     {
         number: "01",
-        title: "Explore",
+        title: "Discover Spaces",
         description:
-            "Browse creative studios and discover the perfect space for your next creative project.",
+            "Explore creative studios and find the right space for your project.",
         icon: Search,
     },
     {
         number: "02",
-        title: "Book",
+        title: "Select Shoot Hours",
         description:
-            "Choose your preferred date and time, then request your studio booking.",
-        icon: CalendarCheck,
+            "Choose your preferred date and time for your studio session.",
+        icon: CalendarClock,
     },
     {
         number: "03",
-        title: "Create",
+        title: "Book Instantly",
         description:
-            "Step into your booked space and bring your creative vision to life.",
+            "Submit your booking request and track its status in Frame.",
+        icon: CalendarCheck,
+    },
+    {
+        number: "04",
+        title: "Create & Produce",
+        description:
+            "Use your booked studio to bring your creative vision to life.",
         icon: Clapperboard,
     },
 ];
+
 
 export default function HowItWorks() {
     return (
@@ -57,7 +69,7 @@ export default function HowItWorks() {
                     </p>
                 </div>
 
-                <div className="grid gap-5 md:grid-cols-3">
+                <div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
                     {steps.map((step) => {
                         const Icon = step.icon;
 

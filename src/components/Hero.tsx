@@ -112,12 +112,14 @@ export default function Hero() {
                             Explore Studios
                         </Link>
 
+
                         <Link
-                            href="/#how-it-works"
+                            href="/add-studio"
                             className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/50 px-7 text-sm font-semibold text-white transition-colors hover:bg-white/10"
                         >
-                            How It Works
+                            Host Your Space
                         </Link>
+
                     </div>
                 </div>
             </div>
@@ -131,8 +133,8 @@ export default function Hero() {
                         aria-label={`Go to slide ${index + 1}`}
                         aria-current={index === activeSlide ? "true" : undefined}
                         className={`h-2.5 rounded-full transition-all ${index === activeSlide
-                                ? "w-9 bg-[#E60023]"
-                                : "w-2.5 bg-white/60 hover:bg-white"
+                            ? "w-9 bg-[#E60023]"
+                            : "w-2.5 bg-white/60 hover:bg-white"
                             }`}
                     />
                 ))}

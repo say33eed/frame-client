@@ -1,40 +1,50 @@
 
 import Link from "next/link";
+
 import {
     ArrowUpRight,
     Camera,
     Clapperboard,
     Mic2,
-    Palette,
+    Music2,
+    Paintbrush,
 } from "lucide-react";
+
+
 
 const categories = [
     {
-        name: "Photography",
-        description: "Portraits, products, and editorial shoots.",
+        name: "Photo Studio",
+        description: "Spaces for portraits, products, and editorial shoots.",
         icon: Camera,
-        href: "/studios?category=photography",
+        href: "/studios?category=photo-studio",
     },
     {
-        name: "Film & Video",
-        description: "Production spaces for stories in motion.",
+        name: "Film Stage",
+        description: "Production spaces for film and video projects.",
         icon: Clapperboard,
-        href: "/studios?category=film-video",
+        href: "/studios?category=film-stage",
     },
     {
-        name: "Podcast & Audio",
-        description: "Recording spaces for every voice.",
+        name: "Podcast Lounge",
+        description: "Recording spaces for podcasts and conversations.",
         icon: Mic2,
-        href: "/studios?category=podcast-audio",
+        href: "/studios?category=podcast-lounge",
     },
     {
-        name: "Creative Spaces",
-        description: "Flexible studios for your next big idea.",
-        icon: Palette,
-        href: "/studios?category=creative",
+        name: "Music Suite",
+        description: "Creative environments for music and audio production.",
+        icon: Music2,
+        href: "/studios?category=music-suite",
     },
-
+    {
+        name: "Workshop",
+        description: "Flexible spaces for hands-on creative sessions.",
+        icon: Paintbrush,
+        href: "/studios?category=workshop",
+    },
 ];
+
 
 export default function StudioCategories() {
     return (
@@ -73,7 +83,7 @@ export default function StudioCategories() {
                 </div>
 
 
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
                     {categories.map((category) => {
                         const Icon = category.icon;
 
