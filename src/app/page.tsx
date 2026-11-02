@@ -21,8 +21,8 @@ export default async function Home() {
     <>
       <Navbar />
       <Hero />
-      <FeaturedStudios />
       <StudioCategories />
+      <FeaturedStudios />
       <HowItWorks />
       <main className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center text-black">
         <h1 className="text-5xl font-semibold tracking-tight">

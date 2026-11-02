@@ -33,7 +33,7 @@ const categories = [
         icon: Palette,
         href: "/studios?category=creative",
     },
-    
+
 ];
 
 export default function StudioCategories() {
@@ -44,23 +44,34 @@ export default function StudioCategories() {
             className="bg-neutral-50 px-5 py-20 sm:px-8 lg:py-28"
         >
             <div className="mx-auto max-w-7xl">
-                <div className="mb-12">
-                    <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#E60023]">
-                        Find your fit
-                    </p>
+                <div className="mb-12 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
+                    <div>
+                        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.25em] text-[#E60023]">
+                            Find your fit
+                        </p>
 
-                    <h2
-                        id="categories-heading"
-                        className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl"
+                        <h2
+                            id="categories-heading"
+                            className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl"
+                        >
+                            Browse by Category
+                        </h2>
+
+                        <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600">
+                            Whatever you&apos;re creating, find a space
+                            that brings your vision to life.
+                        </p>
+                    </div>
+
+                    <Link
+                        href="/studios"
+                        className="inline-flex items-center gap-2 self-start text-sm font-semibold text-neutral-950 transition-colors hover:text-[#E60023]"
                     >
-                        Browse by Category
-                    </h2>
-
-                    <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600">
-                        Whatever you&apos;re creating, find a space
-                        that brings your vision to life.
-                    </p>
+                        Explore all studios
+                        <ArrowUpRight size={18} aria-hidden="true" />
+                    </Link>
                 </div>
+
 
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {categories.map((category) => {
