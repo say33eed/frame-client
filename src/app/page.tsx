@@ -1,4 +1,4 @@
-import Navbar from "@/components/Navbar";
+// import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
 import FeaturedStudios from "@/components/FeaturedStudios";
 import StudioCategories from "@/components/StudioCategories";
@@ -20,7 +20,7 @@ export default async function Home() {
 
   return (
     <>
-      <Navbar />
+      {/* <Navbar /> */}
       <Hero />
       <StudioCategories />
       <FeaturedStudios />
