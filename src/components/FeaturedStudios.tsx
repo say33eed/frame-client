@@ -24,7 +24,7 @@ export default function FeaturedStudios() {
                         </h2>
 
                         <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600">
-                            Explore spaces made for your next big idea.
+                            Explore spaces made for your next big creative idea.
                         </p>
                     </div>
 
