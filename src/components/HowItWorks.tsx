@@ -36,7 +36,7 @@ export default function HowItWorks() {
         <section
             id="how-it-works"
             aria-labelledby="how-it-works-heading"
-            className="scroll-mt-24 bg-white px-5 py-20 sm:px-8 lg:py-28"
+            className="scroll-mt-24 bg-white px-5 py-0 sm:px-8 lg:py-0"
         >
             <div className="mx-auto max-w-7xl">
                 <div className="mx-auto mb-14 max-w-2xl text-center">
