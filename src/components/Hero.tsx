@@ -101,7 +101,7 @@ export default function Hero() {
 
                     <p className="mt-7 max-w-xl text-base leading-relaxed text-white/80 sm:text-lg">
                         Discover inspiring studios for photography, film,
-                        podcasts, and your next creative project.
+                        podcasts, and your creative project.
                     </p>
 
                     <div className="mt-10 flex flex-wrap items-center gap-4">
