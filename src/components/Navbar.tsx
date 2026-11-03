@@ -16,6 +16,7 @@ import {
     UserRound,
 } from "lucide-react";
 import { useState } from "react";
+import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 
 const navigation = [
@@ -111,6 +112,13 @@ function AccountMenu({
     const name = user.name?.trim() || "Frame Creator";
     const firstName = name.split(/\s+/)[0];
 
+    function showSignOutError(message: string) {
+        setSignOutError(message);
+
+        if (message.trim()) {
+            toast.error(message);
+        }
+    }
     async function handleSignOut() {
         if (signingOut) return;
 
@@ -121,16 +129,17 @@ function AccountMenu({
             const result = await authClient.signOut();
 
             if (result.error) {
-                setSignOutError(
+                showSignOutError(
                     result.error.message || "Unable to sign out."
                 );
                 return;
             }
 
+            toast.success("Signed out successfully!");
             router.replace("/");
             router.refresh();
         } catch {
-            setSignOutError("Unable to sign out. Please try again.");
+            showSignOutError("Unable to sign out. Please try again.");
         } finally {
             setSigningOut(false);
         }

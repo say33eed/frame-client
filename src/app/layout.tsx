@@ -1,6 +1,7 @@
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Toaster } from "sonner";
 import Navbar from "@/components/Navbar";
 import "./globals.css";
 
@@ -24,7 +25,9 @@ export const metadata: Metadata = {
   applicationName: "Frame",
 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({
+  children,
+}: LayoutProps<"/">) {
   return (
     <html
       lang="en"
@@ -32,7 +35,16 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col">
         <Navbar />
+
         {children}
+
+        <Toaster
+          position="top-right"
+          richColors
+          closeButton
+          duration={4500}
+          visibleToasts={4}
+        />
       </body>
     </html>
   );

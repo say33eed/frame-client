@@ -2,6 +2,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -69,6 +70,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
         });
     }
 
+    function showAuthError(message: string) {
+        const safeMessage =
+            message.trim() || "Something went wrong. Please try again.";
+
+        setError(safeMessage);
+        toast.error(safeMessage);
+    }
     async function handleSubmit(event: FormEvent<HTMLFormElement>) {
         event.preventDefault();
         if (loading) return;
@@ -79,13 +87,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
         const normalizedEmail = email.trim().toLowerCase();
 
         if (!normalizedEmail || !password) {
-            setError("Please enter your email and password.");
+            showAuthError("Please enter your email and password.");
             return;
         }
 
         if (isRegister) {
             if (name.trim().length < 2) {
-                setError("Please enter your full name.");
+                showAuthError("Please enter your full name.");
                 return;
             }
 
@@ -94,7 +102,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 !/[A-Z]/.test(password) ||
                 !/[a-z]/.test(password)
             ) {
-                setError(
+                showAuthError(
                     "Password must be at least 6 characters and include uppercase and lowercase letters."
                 );
                 return;
@@ -111,7 +119,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         throw new Error("Invalid protocol");
                     }
                 } catch {
-                    setError("Please enter a valid photo URL.");
+                    showAuthError("Please enter a valid photo URL.");
                     return;
                 }
             }
@@ -129,7 +137,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 });
 
                 if (result.error) {
-                    setError(
+                    showAuthError(
                         result.error.message ||
                         "Registration failed. Please try again."
                     );
@@ -140,6 +148,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     "Account created successfully. Redirecting to login..."
                 );
 
+                toast.success("Account created successfully! Please sign in.");
                 router.push("/login?registered=1");
                 return;
             }
@@ -150,17 +159,18 @@ export default function AuthForm({ mode }: AuthFormProps) {
             });
 
             if (result.error) {
-                setError(
+                showAuthError(
                     result.error.message ||
                     "Invalid email or password."
                 );
                 return;
             }
 
+            toast.success("Signed in successfully!");
             router.replace(getSafeRedirect());
             router.refresh();
         } catch {
-            setError(
+            showAuthError(
                 "Unable to connect to Frame. Please try again."
             );
         } finally {
@@ -181,13 +191,13 @@ export default function AuthForm({ mode }: AuthFormProps) {
             });
 
             if (result.error) {
-                setError(
+                showAuthError(
                     result.error.message || "Google sign-in failed."
                 );
                 setLoading(false);
             }
         } catch {
-            setError("Google sign-in is temporarily unavailable.");
+            showAuthError("Google sign-in is temporarily unavailable.");
             setLoading(false);
         }
     }

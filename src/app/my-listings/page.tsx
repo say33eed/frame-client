@@ -19,7 +19,8 @@ import {
     Trash2,
     X,
 } from "lucide-react";
-import { Toaster, toast } from "sonner";
+// import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
 import { apiRequest } from "@/lib/api";
@@ -108,6 +109,7 @@ export default function MyListingsPage() {
             {
                 cache: "no-store",
                 timeoutMs: 15000,
+                retries: 2,
             }
         );
 
@@ -247,11 +249,11 @@ export default function MyListingsPage() {
 
     return (
         <>
-            <Toaster
+            {/* <Toaster
                 position="top-right"
                 richColors
                 closeButton
-            />
+            /> */}
 
             <main className="min-h-[75vh] bg-[#FAFAFA] px-4 pb-24 pt-14 text-neutral-950 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-6xl">

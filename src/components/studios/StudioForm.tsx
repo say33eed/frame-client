@@ -15,7 +15,6 @@ import {
     ArrowLeft,
     ArrowRight,
     Building2,
-    CheckCircle2,
     ImageIcon,
     LoaderCircle,
     LockKeyhole,
@@ -27,6 +26,7 @@ import {
 import { authClient } from "@/lib/auth-client";
 import { apiRequest } from "@/lib/api";
 import { useStudioCategories } from "@/hooks/useStudioCategories";
+import { toast } from "sonner";
 
 const AMENITY_OPTIONS = [
     "High-Speed Wi-Fi",
@@ -156,7 +156,6 @@ export default function StudioForm({
     const [imageFailed, setImageFailed] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
-    const [success, setSuccess] = useState("");
 
     const [savedStudio, setSavedStudio] =
         useState<SavedStudio | null>(null);
@@ -167,7 +166,7 @@ export default function StudioForm({
     // Retrieve the actual saved document from MongoDB.
     // The backend checks that this user owns the studio.
     useEffect(() => {
-        if (!studioId || isPending || !session?.user) {
+        if (!studioId || isPending || !session?.user?.id) {
             return;
         }
 
@@ -200,7 +199,7 @@ export default function StudioForm({
         return () => {
             active = false;
         };
-    }, [studioId, isPending, session?.user]);
+    }, [studioId, isPending, session?.user?.id]);
 
     // Match the database category name to the form's slug.
     // This also handles categories loaded asynchronously.
@@ -322,6 +321,16 @@ export default function StudioForm({
         setCustomAmenity("");
     }
 
+    function showFormError(message: string) {
+        const safeMessage =
+            typeof message === "string" && message.trim()
+                ? message.trim()
+                : "Something went wrong. Please try again.";
+
+        setError(safeMessage);
+        toast.error(safeMessage);
+    }
+
     async function handleSubmit(
         event: FormEvent<HTMLFormElement>
     ) {
@@ -336,7 +345,6 @@ export default function StudioForm({
         }
 
         setError("");
-        setSuccess("");
 
         const title = form.title.trim();
         const location = form.location.trim();
@@ -348,22 +356,22 @@ export default function StudioForm({
         );
 
         if (!category) {
-            setError("Please select a valid studio category.");
+            showFormError("Please select a valid studio category.");
             return;
         }
 
         if (title.length < 5 || title.length > 150) {
-            setError("Studio title must contain 5–150 characters.");
+            showFormError("Studio title must contain 5–150 characters.");
             return;
         }
 
         if (location.length < 5 || location.length > 300) {
-            setError("Please enter a valid studio address.");
+            showFormError("Please enter a valid studio address.");
             return;
         }
 
         if (overview.length < 20 || overview.length > 10000) {
-            setError(
+            showFormError(
                 "Studio overview must contain 20–10,000 characters."
             );
             return;
@@ -378,7 +386,7 @@ export default function StudioForm({
             pricePerHour <= 0 ||
             pricePerHour > 100000
         ) {
-            setError("Enter a valid hourly rate greater than zero.");
+            showFormError("Enter a valid hourly rate greater than zero.");
             return;
         }
 
@@ -387,7 +395,7 @@ export default function StudioForm({
             securityDeposit < 0 ||
             securityDeposit > 1000000
         ) {
-            setError("Enter a valid security deposit.");
+            showFormError("Enter a valid security deposit.");
             return;
         }
 
@@ -396,7 +404,7 @@ export default function StudioForm({
             maxCapacity < 1 ||
             maxCapacity > 10000
         ) {
-            setError("Maximum capacity must be a positive whole number.");
+            showFormError("Maximum capacity must be a positive whole number.");
             return;
         }
 
@@ -411,7 +419,7 @@ export default function StudioForm({
                     throw new Error("Invalid image URL");
                 }
             } catch {
-                setError("Please enter a valid image URL.");
+                showFormError("Please enter a valid image URL.");
                 return;
             }
         }
@@ -445,7 +453,7 @@ export default function StudioForm({
         setSubmitting(false);
 
         if (!result.success) {
-            setError(
+            showFormError(
                 result.status === 401
                     ? "Your session has expired. Please sign in again."
                     : result.message
@@ -453,14 +461,13 @@ export default function StudioForm({
             return;
         }
 
-        setSuccess(
+        toast.success(
             isEditing
                 ? "Studio updated successfully!"
                 : "Studio published successfully!"
         );
 
         router.push("/my-listings");
-        router.refresh();
     }
 
     if (isPending) {
@@ -964,16 +971,6 @@ export default function StudioForm({
                                     Sign In
                                 </Link>
                             )}
-                        </div>
-                    )}
-
-                    {success && (
-                        <div
-                            role="status"
-                            className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-5 py-4 text-sm text-green-800"
-                        >
-                            <CheckCircle2 size={18} aria-hidden="true" />
-                            {success}
                         </div>
                     )}
 
