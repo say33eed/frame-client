@@ -3,7 +3,11 @@
 
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarDays, Clock3, LoaderCircle, Sparkles, X } from "lucide-react";
+import {
+    CalendarDays,
+    LoaderCircle,
+    X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { apiRequest } from "@/lib/api";
 
@@ -20,7 +24,9 @@ type BookingModalProps = {
 type BookingResponse = {
     success: boolean;
     message: string;
-    booking?: { _id: string };
+    booking?: {
+        _id: string;
+    };
 };
 
 const money = (value: number) =>
@@ -31,14 +37,17 @@ const money = (value: number) =>
 
 function localToday() {
     const now = new Date();
+
     const year = now.getFullYear();
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const day = String(now.getDate()).padStart(2, "0");
+
     return `${year}-${month}-${day}`;
 }
 
 function timeMinutes(value: string) {
     if (!/^\d{2}:\d{2}$/.test(value)) return 0;
+
     const [hours, minutes] = value.split(":").map(Number);
     return hours * 60 + minutes;
 }
@@ -62,15 +71,22 @@ export default function BookingModal({
     const [notes, setNotes] = useState("");
     const [submitting, setSubmitting] = useState(false);
 
-    const duration = timeMinutes(endTime) - timeMinutes(startTime);
-    const hours = startTime && endTime && duration > 0
-        ? duration / 60
-        : 0;
+    const duration =
+        timeMinutes(endTime) - timeMinutes(startTime);
 
-    const subtotal = Math.round(pricePerHour * hours * 100) / 100;
-    const total = Math.round((subtotal + securityDeposit) * 100) / 100;
+    const hours =
+        startTime && endTime && duration > 0
+            ? duration / 60
+            : 0;
+
+    const subtotal =
+        Math.round(pricePerHour * hours * 100) / 100;
+
+    const total =
+        Math.round((subtotal + securityDeposit) * 100) / 100;
 
     const validCrew =
+        crewCount.trim() !== "" &&
         Number.isInteger(Number(crewCount)) &&
         Number(crewCount) >= 1 &&
         Number(crewCount) <= maxCapacity;
@@ -79,45 +95,74 @@ export default function BookingModal({
         if (!open) return;
 
         const handleEscape = (event: KeyboardEvent) => {
-            if (event.key === "Escape" && !submittingRef.current) {
+            if (
+                event.key === "Escape" &&
+                !submittingRef.current
+            ) {
                 onClose();
             }
         };
 
         document.addEventListener("keydown", handleEscape);
-        return () => document.removeEventListener("keydown", handleEscape);
+
+        return () => {
+            document.removeEventListener(
+                "keydown",
+                handleEscape
+            );
+        };
     }, [open, onClose]);
 
     if (!open) return null;
 
     function closeModal() {
-        if (!submittingRef.current) onClose();
+        if (!submittingRef.current) {
+            onClose();
+        }
     }
 
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    async function handleSubmit(
+        event: FormEvent<HTMLFormElement>
+    ) {
         event.preventDefault();
 
         if (submittingRef.current) return;
 
-        if (!date || !startTime || !endTime || hours <= 0) {
-            toast.error("Please choose a valid booking date and time.");
+        if (
+            !date ||
+            !startTime ||
+            !endTime ||
+            hours <= 0
+        ) {
+            toast.error(
+                "Please choose a valid booking date and time."
+            );
             return;
         }
 
         if (!validCrew) {
-            toast.error(`Crew count must be between 1 and ${maxCapacity}.`);
+            toast.error(
+                `Crew count must be between 1 and ${maxCapacity}.`
+            );
             return;
         }
 
         if (notes.length > 2000) {
-            toast.error("Production notes cannot exceed 2,000 characters.");
+            toast.error(
+                "Production notes cannot exceed 2,000 characters."
+            );
             return;
         }
 
-        // This matches the backend's current date/time validation.
-        const requestedStart = new Date(`${date}T${startTime}:00Z`);
+        // Matches the current backend UTC validation.
+        const requestedStart = new Date(
+            `${date}T${startTime}:00Z`
+        );
+
         if (requestedStart.getTime() <= Date.now()) {
-            toast.error("Please choose a future booking date and time.");
+            toast.error(
+                "Please choose a future booking date and time."
+            );
             return;
         }
 
@@ -125,28 +170,32 @@ export default function BookingModal({
         setSubmitting(true);
 
         try {
-            const result = await apiRequest<BookingResponse>(
-                "/api/bookings",
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify({
-                        studioId,
-                        date,
-                        startTime,
-                        endTime,
-                        crewCount: Number(crewCount),
-                        notes: notes.trim(),
-                    }),
-                    timeoutMs: 15000,
-                }
-            );
+            const result =
+                await apiRequest<BookingResponse>(
+                    "/api/bookings",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            studioId,
+                            date,
+                            startTime,
+                            endTime,
+                            crewCount: Number(crewCount),
+                            notes: notes.trim(),
+                        }),
+                        timeoutMs: 15000,
+                    }
+                );
 
             if (!result.success) {
                 if (result.status === 401) {
-                    toast.error("Please sign in to request a booking.");
+                    toast.error(
+                        "Please sign in to request a booking."
+                    );
+
                     router.push(
                         `/login?redirect=${encodeURIComponent(
                             `/studios/${studioId}`
@@ -167,7 +216,9 @@ export default function BookingModal({
                 return;
             }
 
-            toast.success("Booking request submitted successfully!");
+            toast.success(
+                "Booking request submitted successfully!"
+            );
 
             setDate("");
             setStartTime("");
@@ -177,7 +228,9 @@ export default function BookingModal({
 
             onClose();
         } catch {
-            toast.error("Unable to submit your booking. Please try again.");
+            toast.error(
+                "Unable to submit your booking. Please try again."
+            );
         } finally {
             submittingRef.current = false;
             setSubmitting(false);
@@ -185,13 +238,15 @@ export default function BookingModal({
     }
 
     const fieldClass =
-        "mt-2 h-11 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-3 text-sm text-neutral-900 outline-none focus:border-amber-500 focus:ring-2 focus:ring-amber-100";
+        "mt-2 h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-sm font-normal text-neutral-950 outline-none transition-colors focus:border-[#E60023] focus:ring-2 focus:ring-red-100";
 
     return (
         <div
-            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-950/70 px-4 py-6 backdrop-blur-[3px]"
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-neutral-950/65 px-4 py-6 backdrop-blur-[3px]"
             onMouseDown={(event) => {
-                if (event.target === event.currentTarget) {
+                if (
+                    event.target === event.currentTarget
+                ) {
                     closeModal();
                 }
             }}
@@ -200,24 +255,28 @@ export default function BookingModal({
                 role="dialog"
                 aria-modal="true"
                 aria-labelledby="booking-modal-title"
-                className="my-auto w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl sm:p-7"
+                className="my-auto w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl sm:p-8"
             >
                 <div className="flex items-start justify-between gap-4">
                     <div>
-                        <p className="text-[11px] font-bold uppercase tracking-wider text-amber-600">
-                            Reserve Creative Slot
+                        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-[#E60023]">
+                            Frame Reservations
                         </p>
 
                         <h2
                             id="booking-modal-title"
-                            className="mt-1 text-xl font-bold leading-tight text-neutral-950"
+                            className="mt-2 text-2xl font-semibold text-neutral-950"
                         >
-                            {studioTitle}
+                            Reserve Your Workspace
                         </h2>
 
-                        <p className="mt-2 text-xs text-neutral-500">
-                            Rate: {money(pricePerHour)}/hr · Deposit:{" "}
-                            {money(securityDeposit)}
+                        <p className="mt-2 text-sm font-medium text-neutral-700">
+                            {studioTitle}
+                        </p>
+
+                        <p className="mt-1 text-xs text-neutral-500">
+                            {money(pricePerHour)}/hr ·{" "}
+                            {money(securityDeposit)} security deposit
                         </p>
                     </div>
 
@@ -226,73 +285,79 @@ export default function BookingModal({
                         onClick={closeModal}
                         disabled={submitting}
                         aria-label="Close booking modal"
-                        className="rounded-full p-1 text-neutral-400 hover:bg-neutral-100 disabled:opacity-50"
+                        className="rounded-full p-2 text-neutral-500 transition-colors hover:bg-neutral-100 disabled:opacity-50"
                     >
-                        <X size={19} />
+                        <X size={21} />
                     </button>
                 </div>
 
-                <form onSubmit={handleSubmit} className="mt-6 space-y-4">
-                    <label className="block text-xs font-semibold text-neutral-700">
-                        Shoot Date
-                        <span className="relative block">
-                            <input
-                                type="date"
-                                required
-                                min={localToday()}
-                                value={date}
-                                onChange={(event) => setDate(event.target.value)}
-                                className={fieldClass}
-                            />
-                            <CalendarDays
-                                size={16}
-                                className="pointer-events-none absolute right-10 top-5 text-neutral-400"
-                            />
-                        </span>
+                <form
+                    onSubmit={handleSubmit}
+                    className="mt-7 space-y-5"
+                >
+                    <label className="block text-sm font-semibold text-neutral-900">
+                        Booking Date
+
+                        <input
+                            type="date"
+                            required
+                            min={localToday()}
+                            value={date}
+                            onChange={(event) =>
+                                setDate(event.target.value)
+                            }
+                            className={fieldClass}
+                        />
                     </label>
 
-                    <div className="grid grid-cols-2 gap-3">
-                        <label className="block text-xs font-semibold text-neutral-700">
+                    <div className="grid grid-cols-2 gap-4">
+                        <label className="block text-sm font-semibold text-neutral-900">
                             Start Time
-                            <span className="relative block">
-                                <input
-                                    type="time"
-                                    required
-                                    value={startTime}
-                                    onChange={(event) =>
-                                        setStartTime(event.target.value)
-                                    }
-                                    className={fieldClass}
-                                />
-                                <Clock3
-                                    size={14}
-                                    className="pointer-events-none absolute right-9 top-5 text-neutral-400"
-                                />
-                            </span>
+
+                            <input
+                                type="time"
+                                required
+                                value={startTime}
+                                onChange={(event) =>
+                                    setStartTime(
+                                        event.target.value
+                                    )
+                                }
+                                className={fieldClass}
+                            />
                         </label>
 
-                        <label className="block text-xs font-semibold text-neutral-700">
+                        <label className="block text-sm font-semibold text-neutral-900">
                             End Time
+
                             <input
                                 type="time"
                                 required
                                 value={endTime}
                                 onChange={(event) =>
-                                    setEndTime(event.target.value)
+                                    setEndTime(
+                                        event.target.value
+                                    )
                                 }
                                 className={fieldClass}
                             />
                         </label>
                     </div>
 
-                    {startTime && endTime && hours === 0 && (
-                        <p className="text-xs text-[#E60023]">
-                            End time must be after start time.
-                        </p>
-                    )}
+                    {startTime &&
+                        endTime &&
+                        hours === 0 && (
+                            <p className="text-sm text-[#E60023]">
+                                End time must be after start time.
+                            </p>
+                        )}
 
-                    <label className="block text-xs font-semibold text-neutral-700">
-                        Expected Crew / Talent Count (Max {maxCapacity})
+                    <label className="block text-sm font-semibold text-neutral-900">
+                        Expected Crew / Talent Count
+                        <span className="ml-1 font-normal text-neutral-500">
+                            (Max {maxCapacity})
+                        </span>
+
                         <input
                             type="number"
                             required
@@ -301,79 +366,124 @@ export default function BookingModal({
                             step={1}
                             value={crewCount}
                             onChange={(event) =>
-                                setCrewCount(event.target.value)
+                                setCrewCount(
+                                    event.target.value
+                                )
                             }
                             className={fieldClass}
                         />
                     </label>
 
-                    <label className="block text-xs font-semibold text-neutral-700">
-                        Production Requirements / Gear Notes{" "}
-                        <span className="font-normal text-neutral-400">
+                    <label className="block text-sm font-semibold text-neutral-900">
+                        Production Requirements / Gear Notes
+                        <span className="ml-1 font-normal text-neutral-400">
                             (Optional)
                         </span>
+
                         <textarea
-                            rows={2}
+                            rows={3}
                             maxLength={2000}
                             value={notes}
                             onChange={(event) =>
-                                setNotes(event.target.value)
+                                setNotes(
+                                    event.target.value
+                                )
                             }
-                            placeholder="e.g. Bringing additional lighting, special equipment..."
-                            className={`${fieldClass} min-h-20 resize-y py-3`}
+                            placeholder="e.g. Additional lighting, camera equipment, or special setup requirements..."
+                            className={`${fieldClass} min-h-24 resize-y py-3`}
                         />
                     </label>
 
-                    <div className="rounded-2xl bg-neutral-100 p-4 text-xs">
-                        <div className="flex justify-between gap-3 py-1">
+                    <div className="rounded-2xl border border-neutral-100 bg-neutral-50 p-5 text-sm">
+                        <div className="flex justify-between gap-3">
                             <span className="text-neutral-500">
-                                {money(pricePerHour)} × {hours || 0} shoot hours
+                                Studio rate
                             </span>
-                            <span className="font-medium text-neutral-700">
+
+                            <span className="font-semibold text-neutral-950">
+                                {money(pricePerHour)}/hr
+                            </span>
+                        </div>
+
+                        <div className="mt-3 flex justify-between gap-3">
+                            <span className="text-neutral-500">
+                                Duration
+                            </span>
+
+                            <span className="font-semibold text-neutral-950">
+                                {hours > 0
+                                    ? `${hours} ${hours === 1
+                                        ? "hour"
+                                        : "hours"
+                                    }`
+                                    : "—"}
+                            </span>
+                        </div>
+
+                        <div className="mt-3 flex justify-between gap-3">
+                            <span className="text-neutral-500">
+                                Studio subtotal
+                            </span>
+
+                            <span className="font-semibold text-neutral-950">
                                 {money(subtotal)}
                             </span>
                         </div>
 
-                        <div className="flex justify-between gap-3 py-1">
+                        <div className="mt-3 flex justify-between gap-3">
                             <span className="text-neutral-500">
-                                Refundable Security Deposit
+                                Refundable security deposit
                             </span>
-                            <span className="font-medium text-neutral-700">
+
+                            <span className="font-semibold text-neutral-950">
                                 {money(securityDeposit)}
                             </span>
                         </div>
 
-                        <div className="mt-2 flex justify-between gap-3 border-t border-neutral-200 pt-3 text-sm font-bold">
-                            <span>Total Estimated Cost</span>
-                            <span className="text-amber-600">
-                                {hours > 0 ? money(total) : "—"}
+                        <div className="mt-4 flex justify-between gap-3 border-t border-neutral-200 pt-4 text-base font-bold">
+                            <span className="text-neutral-950">
+                                Estimated total
+                            </span>
+
+                            <span className="text-[#E60023]">
+                                {hours > 0
+                                    ? money(total)
+                                    : "—"}
                             </span>
                         </div>
                     </div>
 
                     <button
                         type="submit"
-                        disabled={submitting || !hours || !validCrew}
-                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-amber-500 px-4 text-sm font-bold text-neutral-950 shadow-md transition hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        disabled={
+                            submitting ||
+                            !hours ||
+                            !validCrew
+                        }
+                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-[#E60023] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         {submitting ? (
                             <>
                                 <LoaderCircle
-                                    size={17}
+                                    size={18}
                                     className="animate-spin"
                                 />
                                 Sending Booking Request...
                             </>
                         ) : (
                             <>
-                                <Sparkles size={17} />
+                                <CalendarDays size={17} />
                                 Confirm & Send Booking Request
                             </>
                         )}
                     </button>
 
-                    <p className="text-center text-[11px] text-neutral-500">
-                        Requests are submitted as Pending until reviewed.
+                    <p className="text-center text-xs leading-5 text-neutral-500">
+                        Booking requests are submitted as{" "}
+                        <span className="font-semibold text-neutral-700">
+                            Pending
+                        </span>{" "}
+                        until reviewed.
                     </p>
                 </form>
             </div>
