@@ -219,7 +219,7 @@ export default function MyListingsPage() {
 
     if (!session?.user) {
         return (
-            <main className="flex min-h-[70vh] items-center justify-center bg-[#FAFAFA] px-5">
+            <main className="flex min-h-[70vh] items-center justify-center bg-[#FAFAFA] dark:bg-[#111111] px-5">
                 <div className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-8 text-center shadow-sm">
                     <ShieldAlert
                         size={36}
@@ -255,7 +255,7 @@ export default function MyListingsPage() {
                 closeButton
             /> */}
 
-            <main className="min-h-[75vh] bg-[#FAFAFA] px-4 pb-24 pt-14 text-neutral-950 sm:px-6 lg:px-8">
+            <main className="min-h-[75vh] bg-[#FAFAFA] dark:bg-[#111111] px-4 pb-24 pt-14 text-neutral-950 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-6xl">
                     <header className="mb-8 flex flex-wrap items-end justify-between gap-5">
                         <div>
@@ -377,7 +377,7 @@ export default function MyListingsPage() {
 
                             <div className="overflow-x-auto">
                                 <table className="w-full min-w-[850px] text-left text-sm">
-                                    <thead className="bg-neutral-50 text-xs font-semibold uppercase tracking-wider text-neutral-500">
+                                    <thead className="bg-neutral-50 dark:bg-neutral-800 text-xs font-semibold uppercase tracking-wider text-neutral-500">
                                         <tr>
                                             <th
                                                 scope="col"
@@ -427,7 +427,7 @@ export default function MyListingsPage() {
                                         {studios.map((studio) => (
                                             <tr
                                                 key={studio._id}
-                                                className="transition-colors hover:bg-neutral-50/80"
+                                                className="transition-colors hover:bg-neutral-50/80 dark:hover:bg-[#292929]"
                                             >
                                                 <td className="px-6 py-4">
                                                     <div className="flex min-w-64 items-center gap-3">
@@ -461,7 +461,7 @@ export default function MyListingsPage() {
                                                 </td>
 
                                                 <td className="px-4 py-4">
-                                                    <span className="inline-flex whitespace-nowrap rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-700">
+                                                    <span className="inline-flex whitespace-nowrap rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-medium text-neutral-700 dark:bg-neutral-800 dark:text-neutral-200">
                                                         {studio.category ||
                                                             "Uncategorized"}
                                                     </span>
@@ -496,7 +496,7 @@ export default function MyListingsPage() {
                                                                 studio
                                                             )}`}
                                                             title="View Studio"
-                                                            className="rounded-lg p-2.5 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950"
+                                                            className="rounded-lg p-2.5 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-950 dark:hover:bg-neutral-700 dark:hover:text-white"
                                                         >
                                                             <ArrowUpRight
                                                                 size={18}
@@ -527,7 +527,7 @@ export default function MyListingsPage() {
                                                             aria-label={`Delete ${studioName(
                                                                 studio
                                                             )}`}
-                                                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 transition hover:bg-rose-50"
+                                                            className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-rose-600 transition hover:bg-rose-50 dark:hover:bg-rose-950/40"
                                                         >
                                                             <Trash2
                                                                 size={17}

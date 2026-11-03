@@ -41,7 +41,7 @@ export default function AboutUs() {
         <section
             id="about-us"
             aria-labelledby="about-us-heading"
-            className="scroll-mt-20 mt-24 bg-[#FAF9F8] px-5 py-20 sm:px-8 lg:py-28"
+            className="scroll-mt-20 mt-24 bg-[#FAF9F8] dark:bg-[#111111] px-5 py-20 sm:px-8 lg:py-28"
         >
             <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
@@ -83,7 +83,7 @@ export default function AboutUs() {
 
                         <Link
                             href="/studios"
-                            className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 px-7 text-sm font-semibold text-neutral-950 transition-colors hover:border-neutral-900 hover:bg-neutral-100"
+                            className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 px-7 text-sm font-semibold text-neutral-950 transition-colors hover:border-[#E60023] hover:bg-red-50 hover:text-[#E60023] dark:border-neutral-600 dark:text-white dark:hover:border-[#E60023] dark:hover:bg-red-950/30"
                         >
                             Explore Studios
                         </Link>
@@ -98,7 +98,7 @@ export default function AboutUs() {
                         return (
                             <div
                                 key={feature.title}
-                                className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm"
+                                className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-colors hover:border-red-200 dark:border-neutral-700 dark:bg-[#1c1c1c] dark:hover:border-red-800"
                             >
                                 <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-[#E60023]">
                                     <Icon size={21} aria-hidden="true" />

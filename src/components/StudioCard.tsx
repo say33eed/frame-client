@@ -33,7 +33,7 @@ export default function StudioCard({
     }).format(studio.pricePerHour);
 
     return (
-        <article className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-shadow hover:shadow-lg">
+        <article className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all hover:border-red-300 hover:shadow-lg dark:hover:border-red-800">
             <Link
                 href={`/studios/${encodeURIComponent(studio.id)}`}
                 className="block focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023]"

@@ -267,7 +267,7 @@ function ExploreStudiosContent() {
     ]);
 
     return (
-        <main className="min-h-screen bg-[#FAFAFA] pb-24 pt-14 text-neutral-950">
+        <main className="min-h-screen bg-[#FAFAFA] dark:bg-[#111111] pb-24 pt-14 text-neutral-950">
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 
                 {/* PAGE HEADER */}
@@ -386,7 +386,7 @@ function ExploreStudiosContent() {
                                     className={`rounded-full px-3.5 py-2 text-xs font-semibold transition ${selectedCategory ===
                                             category.slug
                                             ? "bg-[#E60023] text-white shadow-sm"
-                                            : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200"
+                                            : "bg-neutral-100 text-neutral-700 hover:bg-neutral-200 dark:hover:bg-neutral-700"
                                         }`}
                                 >
                                     {category.name}
@@ -524,7 +524,7 @@ function ExploreStudiosContent() {
                             (studio) => (
                                 <article
                                     key={studio._id}
-                                    className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+                                    className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition hover:-translate-y-1 hover:border-red-300 hover:shadow-lg dark:hover:border-red-800"
                                 >
                                     <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
                                         {studio.imageUrl ? (
@@ -542,11 +542,11 @@ function ExploreStudiosContent() {
                                             </div>
                                         )}
 
-                                        <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 shadow-sm">
+                                        <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 dark:bg-neutral-900/95 dark:text-white shadow-sm">
                                             {studio.category}
                                         </span>
 
-                                        <span className="absolute bottom-4 left-4 rounded-lg bg-neutral-950/90 px-3 py-1.5 text-sm font-bold text-white">
+                                        <span className="absolute bottom-4 left-4 rounded-lg bg-neutral-950/90 px-3 py-1.5 text-sm font-bold text-white dark:bg-black/90">
                                             $
                                             {studioPrice(
                                                 studio
@@ -561,7 +561,7 @@ function ExploreStudiosContent() {
 
                                         {typeof studio.rating ===
                                             "number" && (
-                                                <span className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-lg bg-neutral-950/90 px-2.5 py-1.5 text-xs font-semibold text-white">
+                                                <span className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-lg bg-neutral-950/90 px-2.5 py-1.5 text-xs font-semibold text-white dark:bg-black/90">
                                                     <Star
                                                         size={13}
                                                         className="fill-yellow-400 text-yellow-400"
@@ -683,7 +683,7 @@ export default function ExploreStudiosPage() {
     return (
         <Suspense
             fallback={
-                <main className="min-h-screen bg-[#FAFAFA] px-4 py-20 text-center text-neutral-500">
+                <main className="min-h-screen bg-[#FAFAFA] dark:bg-[#111111] px-4 py-20 text-center text-neutral-500">
                     Loading creative studios...
                 </main>
             }

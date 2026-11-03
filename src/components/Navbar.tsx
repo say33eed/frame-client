@@ -270,7 +270,7 @@ export default function Navbar() {
     }
 
     return (
-        <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/95 backdrop-blur-md">
+        <header className="sticky top-0 z-50 border-b border-neutral-200 bg-white/95 backdrop-blur-md dark:border-neutral-800 dark:bg-neutral-950/95">
             <div className="mx-auto flex h-20 max-w-7xl items-center justify-between gap-6 px-5 sm:px-8">
                 <Link
                     href="/"
@@ -283,7 +283,14 @@ export default function Navbar() {
                         width={180}
                         height={48}
                         priority
-                        className="h-10 w-auto"
+                        className="h-10 w-auto dark:hidden"
+                    />
+                    <Image
+                        src="/images/brand/frame-logo-white.svg"
+                        alt=""
+                        width={180}
+                        height={48}
+                        className="hidden h-10 w-auto dark:block"
                     />
                 </Link>
 

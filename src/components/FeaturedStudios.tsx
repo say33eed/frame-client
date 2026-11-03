@@ -202,7 +202,7 @@ export default function FeaturedStudios() {
                         {studios.map((studio) => (
                             <article
                                 key={studio._id}
-                                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-lg"
+                                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-red-300 hover:shadow-lg dark:hover:border-red-800"
                             >
                                 <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
                                     {studio.imageUrl ? (
@@ -222,12 +222,12 @@ export default function FeaturedStudios() {
                                         </div>
                                     )}
 
-                                    <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 shadow-sm">
+                                    <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 dark:bg-neutral-900/95 dark:text-white shadow-sm">
                                         {studio.category || "Creative Space"}
                                     </span>
 
                                     {typeof studio.rating === "number" && (
-                                        <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 shadow-sm">
+                                        <span className="absolute right-4 top-4 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 dark:bg-neutral-900/95 dark:text-white shadow-sm">
                                             <Star
                                                 size={13}
                                                 className="fill-amber-400 text-amber-400"

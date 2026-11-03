@@ -121,9 +121,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
+
   html {
     @apply font-sans;
   }
@@ -141,3 +143,34 @@ html {
     scroll-behavior: auto;
   }
 }
+
+/* FRAME: dark mode fallback for older light-only components.
+   Component-level dark: utilities remain the preferred solution. */
+html.dark { color-scheme: dark; }
+html.dark body { background: #111; color: #fafafa; }
+html.dark :where(.bg-white, .bg-white\/95, .bg-white\/90, .bg-white\/80) { background-color: #1c1c1c; }
+html.dark :where(.bg-neutral-50, .bg-gray-50, .bg-zinc-50, .bg-slate-50) { background-color: #171717; }
+html.dark :where(.bg-neutral-100, .bg-gray-100) { background-color: #262626; }
+html.dark :where(.text-black, .text-neutral-950, .text-neutral-900, .text-neutral-800) { color: #fafafa; }
+html.dark :where(.text-neutral-700, .text-neutral-600) { color: #d4d4d4; }
+html.dark :where(.text-neutral-500, .text-gray-500) { color: #a3a3a3; }
+html.dark :where(.border-neutral-100, .border-neutral-200, .border-neutral-300) { border-color: #404040; }
+html.dark :where(.bg-red-50) { background-color: #450a0a; }
+html.dark :where(.bg-amber-50) { background-color: #422006; }
+html.dark :where(.bg-blue-50) { background-color: #172554; }
+html.dark :where(.bg-green-50, .bg-emerald-50) { background-color: #052e16; }
+html.dark :where(.hover\:bg-neutral-50:hover, .hover\:bg-neutral-100:hover, .hover\:bg-neutral-50\/80:hover) { background-color: #292929; }
+html.dark :where(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select) { background-color: #262626; color: #fafafa; border-color: #525252; }
+html.dark :where(input,textarea)::placeholder { color: #a3a3a3; }
+html.dark :where(input[type=date],input[type=time],input[type=datetime-local]) { color-scheme: dark; }
+html.dark select option { background-color: #262626; color: #fafafa; }
+
+/* Focus ring stays visible while typing, in both themes. */
+:where(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select,[role=combobox]):focus {
+  border-color: #e60023 !important;
+  outline: 2px solid transparent;
+  box-shadow: 0 0 0 3px rgb(230 0 35 / 20%) !important;
+}
+:where(button,a,summary,[role=button]):focus-visible { outline: 2px solid #e60023; outline-offset: 3px; }
+:where(button,a,summary,input,select,textarea) { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease; }
+@media (prefers-reduced-motion: reduce) { :where(button,a,summary,input,select,textarea) { transition-duration: 0.01ms; } }

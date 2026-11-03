@@ -1,8 +1,10 @@
 
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { Toaster } from "sonner";
+import { ThemeAwareToaster } from "@/components/ThemeAwareToaster";
+
 import Navbar from "@/components/Navbar";
+import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -25,26 +27,46 @@ export const metadata: Metadata = {
   applicationName: "Frame",
 };
 
+const themeScript = `
+(function () {
+    try {
+        var saved = localStorage.getItem("frame-theme");
+        var dark = saved === "dark" ||
+            (saved !== "light" &&
+             window.matchMedia("(prefers-color-scheme: dark)").matches);
+
+        document.documentElement.classList.toggle("dark", dark);
+        document.documentElement.style.colorScheme = dark ? "dark" : "light";
+    } catch (error) {
+        // Use the default theme if storage is unavailable.
+    }
+})();
+`;
+
 export default function RootLayout({
   children,
 }: LayoutProps<"/">) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: themeScript,
+          }}
+        />
+      </head>
+
       <body className="flex min-h-full flex-col">
         <Navbar />
 
         {children}
 
-        <Toaster
-          position="top-right"
-          richColors
-          closeButton
-          duration={4500}
-          visibleToasts={4}
-        />
+        <ThemeToggle />
+        <ThemeAwareToaster />
       </body>
     </html>
   );
