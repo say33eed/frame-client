@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import { toast } from "sonner";
 import Image from "next/image";
 import Link from "next/link";
@@ -26,7 +26,7 @@ type AuthFormProps = {
     mode: "login" | "register";
 };
 
-function getSafeRedirect() {
+function getSafeRedirect(): string {
     if (typeof window === "undefined") return "/";
 
     const requested = new URLSearchParams(
@@ -47,6 +47,14 @@ function getSafeRedirect() {
     return "/";
 }
 
+function getGoogleCallbackURL(): string {
+    const destination = getSafeRedirect();
+
+    // Google must return users to the FRONTEND, not the
+    // Express backend. An absolute URL is essential here.
+    return new URL(destination, window.location.origin).href;
+}
+
 export default function AuthForm({ mode }: AuthFormProps) {
     const router = useRouter();
     const isRegister = mode === "register";
@@ -63,22 +71,28 @@ export default function AuthForm({ mode }: AuthFormProps) {
     const { data: session, isPending } =
         authClient.useSession();
 
-    if (!isPending && session?.user) {
-        // Navigation is scheduled outside rendering.
-        Promise.resolve().then(() => {
+    // Redirect existing authenticated users without
+    // performing navigation during React rendering.
+    useEffect(() => {
+        if (!isPending && session?.user) {
             router.replace(getSafeRedirect());
-        });
-    }
+        }
+    }, [isPending, session?.user, router]);
 
     function showAuthError(message: string) {
         const safeMessage =
-            message.trim() || "Something went wrong. Please try again.";
+            message.trim() ||
+            "Something went wrong. Please try again.";
 
         setError(safeMessage);
         toast.error(safeMessage);
     }
-    async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+
+    async function handleSubmit(
+        event: FormEvent<HTMLFormElement>
+    ) {
         event.preventDefault();
+
         if (loading) return;
 
         setError("");
@@ -87,13 +101,17 @@ export default function AuthForm({ mode }: AuthFormProps) {
         const normalizedEmail = email.trim().toLowerCase();
 
         if (!normalizedEmail || !password) {
-            showAuthError("Please enter your email and password.");
+            showAuthError(
+                "Please enter your email and password."
+            );
             return;
         }
 
         if (isRegister) {
             if (name.trim().length < 2) {
-                showAuthError("Please enter your full name.");
+                showAuthError(
+                    "Please enter your full name."
+                );
                 return;
             }
 
@@ -119,7 +137,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         throw new Error("Invalid protocol");
                     }
                 } catch {
-                    showAuthError("Please enter a valid photo URL.");
+                    showAuthError(
+                        "Please enter a valid photo URL."
+                    );
                     return;
                 }
             }
@@ -148,7 +168,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     "Account created successfully. Redirecting to login..."
                 );
 
-                toast.success("Account created successfully! Please sign in.");
+                toast.success(
+                    "Account created successfully! Please sign in."
+                );
+
                 router.push("/login?registered=1");
                 return;
             }
@@ -179,34 +202,93 @@ export default function AuthForm({ mode }: AuthFormProps) {
     }
 
     async function handleGoogleSignIn() {
-        if (!googleAuthEnabled || loading) return;
+        if (
+            !googleAuthEnabled ||
+            loading ||
+            Boolean(session?.user)
+        ) {
+            return;
+        }
 
         setError("");
+        setSuccess("");
         setLoading(true);
 
         try {
             const result = await authClient.signIn.social({
                 provider: "google",
-                callbackURL: getSafeRedirect(),
+
+                // FIX: absolute frontend URL.
+                // Local: http://localhost:3000/
+                // Production: https://frame-client.vercel.app/
+                callbackURL: getGoogleCallbackURL(),
             });
 
             if (result.error) {
                 showAuthError(
-                    result.error.message || "Google sign-in failed."
+                    result.error.message ||
+                    "Google sign-in failed."
                 );
                 setLoading(false);
             }
+
+            // On success, Better Auth handles the browser
+            // redirect to Google's authentication page.
         } catch {
-            showAuthError("Google sign-in is temporarily unavailable.");
+            showAuthError(
+                "Google sign-in is temporarily unavailable."
+            );
             setLoading(false);
         }
     }
 
+    const inputClass =
+        "h-12 w-full rounded-xl border border-neutral-200 " +
+        "bg-neutral-50 pl-11 pr-4 text-sm text-neutral-950 " +
+        "outline-none transition " +
+        "placeholder:text-neutral-400 " +
+        "focus:border-[#E60023] " +
+        "focus:ring-2 focus:ring-red-100 " +
+        "dark:border-neutral-700 dark:bg-neutral-900 " +
+        "dark:text-neutral-100 " +
+        "dark:placeholder:text-neutral-500 " +
+        "dark:focus:border-[#E60023] " +
+        "dark:focus:ring-red-950";
+
+    const labelClass =
+        "mb-2 block text-sm font-semibold " +
+        "text-neutral-800 dark:text-neutral-200";
+
+    const fieldIconClass =
+        "pointer-events-none absolute left-4 top-1/2 " +
+        "-translate-y-1/2 text-neutral-400 " +
+        "dark:text-neutral-500";
+
     return (
-        <main className="flex min-h-[calc(100vh-5rem)] items-center justify-center bg-neutral-50 px-5 py-16 sm:px-8">
-            <div className="w-full max-w-md rounded-3xl border border-neutral-200 bg-white px-7 py-10 shadow-xl shadow-neutral-950/5 sm:px-10">
+        <main
+            className={
+                "flex min-h-[calc(100vh-5rem)] items-center " +
+                "justify-center bg-neutral-50 px-5 py-16 " +
+                "sm:px-8 dark:bg-neutral-950"
+            }
+        >
+            <div
+                className={
+                    "w-full max-w-md rounded-3xl border " +
+                    "border-neutral-200 bg-white px-7 py-10 " +
+                    "shadow-xl shadow-neutral-950/5 sm:px-10 " +
+                    "dark:border-neutral-800 " +
+                    "dark:bg-neutral-900"
+                }
+            >
                 <div className="flex flex-col items-center text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50">
+                    <div
+                        className={
+                            "flex h-16 w-16 items-center " +
+                            "justify-center rounded-2xl " +
+                            "bg-red-50 dark:bg-red-950/40"
+                        }
+                    >
                         <Image
                             src="/images/brand/frame-mark.svg"
                             alt="Frame"
@@ -216,11 +298,24 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         />
                     </div>
 
-                    <h1 className="mt-5 text-3xl font-semibold tracking-tight text-neutral-950">
-                        {isRegister ? "Join Frame" : "Creator Login"}
+                    <h1
+                        className={
+                            "mt-5 text-3xl font-semibold " +
+                            "tracking-tight text-neutral-950 " +
+                            "dark:text-white"
+                        }
+                    >
+                        {isRegister
+                            ? "Join Frame"
+                            : "Creator Login"}
                     </h1>
 
-                    <p className="mt-3 max-w-xs text-sm leading-relaxed text-neutral-500">
+                    <p
+                        className={
+                            "mt-3 max-w-xs text-sm leading-relaxed " +
+                            "text-neutral-500 dark:text-neutral-400"
+                        }
+                    >
                         {isRegister
                             ? "Create your account and discover spaces made for your next big idea."
                             : "Access your studio listings, bookings, and creative workspace."}
@@ -230,7 +325,14 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 {error && (
                     <div
                         role="alert"
-                        className="mt-7 flex gap-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-800"
+                        className={
+                            "mt-7 flex gap-3 rounded-xl border " +
+                            "border-red-200 bg-red-50 p-3 " +
+                            "text-sm text-red-800 " +
+                            "dark:border-red-900 " +
+                            "dark:bg-red-950/40 " +
+                            "dark:text-red-200"
+                        }
                     >
                         <AlertCircle
                             size={18}
@@ -244,7 +346,12 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 {success && (
                     <p
                         role="status"
-                        className="mt-7 rounded-xl bg-green-50 p-3 text-sm text-green-800"
+                        className={
+                            "mt-7 rounded-xl bg-green-50 " +
+                            "p-3 text-sm text-green-800 " +
+                            "dark:bg-green-950/40 " +
+                            "dark:text-green-300"
+                        }
                     >
                         {success}
                     </p>
@@ -258,7 +365,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         <div>
                             <label
                                 htmlFor="auth-name"
-                                className="mb-2 block text-sm font-semibold text-neutral-800"
+                                className={labelClass}
                             >
                                 Full Name
                             </label>
@@ -266,9 +373,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
                             <div className="relative">
                                 <UserRound
                                     size={18}
-                                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                                    className={fieldIconClass}
                                     aria-hidden="true"
                                 />
+
                                 <input
                                     id="auth-name"
                                     type="text"
@@ -281,7 +389,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                                         setName(event.target.value)
                                     }
                                     placeholder="Your full name"
-                                    className="h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 pl-11 pr-4 text-sm text-neutral-950 outline-none transition focus:border-[#E60023] focus:ring-2 focus:ring-red-100"
+                                    className={inputClass}
                                 />
                             </div>
                         </div>
@@ -290,7 +398,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                     <div>
                         <label
                             htmlFor="auth-email"
-                            className="mb-2 block text-sm font-semibold text-neutral-800"
+                            className={labelClass}
                         >
                             Email Address
                         </label>
@@ -298,9 +406,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         <div className="relative">
                             <Mail
                                 size={18}
-                                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                                className={fieldIconClass}
                                 aria-hidden="true"
                             />
+
                             <input
                                 id="auth-email"
                                 type="email"
@@ -311,7 +420,7 @@ export default function AuthForm({ mode }: AuthFormProps) {
                                     setEmail(event.target.value)
                                 }
                                 placeholder="creator@example.com"
-                                className="h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 pl-11 pr-4 text-sm text-neutral-950 outline-none transition focus:border-[#E60023] focus:ring-2 focus:ring-red-100"
+                                className={inputClass}
                             />
                         </div>
                     </div>
@@ -320,20 +429,26 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         <div>
                             <label
                                 htmlFor="auth-photo"
-                                className="mb-2 block text-sm font-semibold text-neutral-800"
+                                className={labelClass}
                             >
                                 Profile Photo URL
-                                <span className="ml-1 font-normal text-neutral-400">
-                                    (optional)
+                                <span
+                                    className={
+                                        "ml-1 font-normal " +
+                                        "text-neutral-400"
+                                    }
+                                >
+                                    {" "}(optional)
                                 </span>
                             </label>
 
                             <div className="relative">
                                 <ImageIcon
                                     size={18}
-                                    className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                                    className={fieldIconClass}
                                     aria-hidden="true"
                                 />
+
                                 <input
                                     id="auth-photo"
                                     type="url"
@@ -343,17 +458,26 @@ export default function AuthForm({ mode }: AuthFormProps) {
                                         setPhotoURL(event.target.value)
                                     }
                                     placeholder="https://example.com/photo.jpg"
-                                    className="h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 pl-11 pr-4 text-sm text-neutral-950 outline-none transition focus:border-[#E60023] focus:ring-2 focus:ring-red-100"
+                                    className={inputClass}
                                 />
                             </div>
                         </div>
                     )}
 
                     <div>
-                        <div className="mb-2 flex items-center justify-between gap-3">
+                        <div
+                            className={
+                                "mb-2 flex items-center " +
+                                "justify-between gap-3"
+                            }
+                        >
                             <label
                                 htmlFor="auth-password"
-                                className="text-sm font-semibold text-neutral-800"
+                                className={
+                                    "text-sm font-semibold " +
+                                    "text-neutral-800 " +
+                                    "dark:text-neutral-200"
+                                }
                             >
                                 Password
                             </label>
@@ -361,7 +485,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
                             {!isRegister && (
                                 <span
                                     title="Password reset is not available yet"
-                                    className="cursor-not-allowed text-xs font-medium text-neutral-400"
+                                    className={
+                                        "cursor-not-allowed " +
+                                        "text-xs font-medium " +
+                                        "text-neutral-400"
+                                    }
                                 >
                                     Forgot Password?
                                 </span>
@@ -371,26 +499,37 @@ export default function AuthForm({ mode }: AuthFormProps) {
                         <div className="relative">
                             <LockKeyhole
                                 size={18}
-                                className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-neutral-400"
+                                className={fieldIconClass}
                                 aria-hidden="true"
                             />
 
                             <input
                                 id="auth-password"
-                                type={showPassword ? "text" : "password"}
+                                type={
+                                    showPassword
+                                        ? "text"
+                                        : "password"
+                                }
                                 autoComplete={
                                     isRegister
                                         ? "new-password"
                                         : "current-password"
                                 }
                                 required
-                                minLength={isRegister ? 6 : undefined}
+                                minLength={
+                                    isRegister ? 6 : undefined
+                                }
                                 value={password}
                                 onChange={(event) =>
                                     setPassword(event.target.value)
                                 }
                                 placeholder="Enter your password"
-                                className="h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 pl-11 pr-12 text-sm text-neutral-950 outline-none transition focus:border-[#E60023] focus:ring-2 focus:ring-red-100"
+                                className={
+                                    inputClass.replace(
+                                        "pr-4",
+                                        "pr-12"
+                                    )
+                                }
                             />
 
                             <button
@@ -401,21 +540,42 @@ export default function AuthForm({ mode }: AuthFormProps) {
                                         : "Show password"
                                 }
                                 onClick={() =>
-                                    setShowPassword((previous) => !previous)
+                                    setShowPassword(
+                                        (previous) => !previous
+                                    )
                                 }
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-800"
+                                className={
+                                    "absolute right-4 top-1/2 " +
+                                    "-translate-y-1/2 " +
+                                    "text-neutral-400 " +
+                                    "transition-colors " +
+                                    "hover:text-[#E60023] " +
+                                    "dark:hover:text-red-400"
+                                }
                             >
                                 {showPassword ? (
-                                    <EyeOff size={18} aria-hidden="true" />
+                                    <EyeOff
+                                        size={18}
+                                        aria-hidden="true"
+                                    />
                                 ) : (
-                                    <Eye size={18} aria-hidden="true" />
+                                    <Eye
+                                        size={18}
+                                        aria-hidden="true"
+                                    />
                                 )}
                             </button>
                         </div>
 
                         {isRegister && (
-                            <p className="mt-2 text-xs text-neutral-500">
-                                At least 6 characters, including uppercase and
+                            <p
+                                className={
+                                    "mt-2 text-xs text-neutral-500 " +
+                                    "dark:text-neutral-400"
+                                }
+                            >
+                                At least 6 characters,
+                                including uppercase and
                                 lowercase letters.
                             </p>
                         )}
@@ -423,8 +583,23 @@ export default function AuthForm({ mode }: AuthFormProps) {
 
                     <button
                         type="submit"
-                        disabled={loading || Boolean(session?.user)}
-                        className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl bg-[#E60023] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F] disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={
+                            loading ||
+                            Boolean(session?.user)
+                        }
+                        className={
+                            "flex min-h-12 w-full items-center " +
+                            "justify-center gap-2 rounded-xl " +
+                            "bg-[#E60023] px-5 text-sm " +
+                            "font-semibold text-white " +
+                            "transition-colors " +
+                            "hover:bg-[#C9001F] " +
+                            "focus-visible:outline-2 " +
+                            "focus-visible:outline-offset-2 " +
+                            "focus-visible:outline-[#E60023] " +
+                            "disabled:cursor-not-allowed " +
+                            "disabled:opacity-60"
+                        }
                     >
                         {loading ? (
                             <LoaderCircle
@@ -434,7 +609,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
                             />
                         ) : (
                             <>
-                                {isRegister ? "Create Account" : "Sign In"}
+                                {isRegister
+                                    ? "Create Account"
+                                    : "Sign In"}
                                 <ArrowRight
                                     size={17}
                                     aria-hidden="true"
@@ -445,48 +622,123 @@ export default function AuthForm({ mode }: AuthFormProps) {
                 </form>
 
                 <div className="my-7 flex items-center gap-4">
-                    <div className="h-px flex-1 bg-neutral-200" />
-                    <span className="text-xs font-medium uppercase tracking-wider text-neutral-400">
+                    <div
+                        className={
+                            "h-px flex-1 bg-neutral-200 " +
+                            "dark:bg-neutral-700"
+                        }
+                    />
+
+                    <span
+                        className={
+                            "text-xs font-medium uppercase " +
+                            "tracking-wider text-neutral-400"
+                        }
+                    >
                         Or continue with
                     </span>
-                    <div className="h-px flex-1 bg-neutral-200" />
+
+                    <div
+                        className={
+                            "h-px flex-1 bg-neutral-200 " +
+                            "dark:bg-neutral-700"
+                        }
+                    />
                 </div>
 
                 <button
                     type="button"
-                    onClick={() => void handleGoogleSignIn()}
-                    disabled={!googleAuthEnabled || loading}
+                    onClick={() =>
+                        void handleGoogleSignIn()
+                    }
+                    disabled={
+                        !googleAuthEnabled ||
+                        loading ||
+                        Boolean(session?.user)
+                    }
                     title={
                         googleAuthEnabled
                             ? "Sign in with Google"
                             : "Google sign-in will be available after configuration"
                     }
-                    className="flex min-h-12 w-full items-center justify-center gap-3 rounded-xl border border-neutral-200 bg-white px-5 text-sm font-semibold text-neutral-800 transition-colors hover:bg-neutral-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className={
+                        "flex min-h-12 w-full items-center " +
+                        "justify-center gap-3 rounded-xl " +
+                        "border border-neutral-200 bg-white " +
+                        "px-5 text-sm font-semibold " +
+                        "text-neutral-800 transition-colors " +
+                        "hover:border-[#E60023] " +
+                        "hover:bg-red-50 " +
+                        "focus-visible:outline-2 " +
+                        "focus-visible:outline-offset-2 " +
+                        "focus-visible:outline-[#E60023] " +
+                        "disabled:cursor-not-allowed " +
+                        "disabled:opacity-50 " +
+                        "dark:border-neutral-700 " +
+                        "dark:bg-neutral-800 " +
+                        "dark:text-neutral-100 " +
+                        "dark:hover:border-[#E60023] " +
+                        "dark:hover:bg-red-950/30"
+                    }
                 >
-                    <span
-                        className="text-lg font-bold text-[#4285F4]"
-                        aria-hidden="true"
-                    >
-                        G
-                    </span>
+                    {loading ? (
+                        <LoaderCircle
+                            size={18}
+                            className="animate-spin"
+                            aria-hidden="true"
+                        />
+                    ) : (
+                        <span
+                            className={
+                                "text-lg font-bold " +
+                                "text-[#4285F4]"
+                            }
+                            aria-hidden="true"
+                        >
+                            G
+                        </span>
+                    )}
+
                     Continue with Google
                 </button>
 
                 {!googleAuthEnabled && (
-                    <p className="mt-2 text-center text-xs text-neutral-400">
+                    <p
+                        className={
+                            "mt-2 text-center text-xs " +
+                            "text-neutral-400"
+                        }
+                    >
                         Google sign-in is being configured.
                     </p>
                 )}
 
-                <p className="mt-8 text-center text-sm text-neutral-500">
+                <p
+                    className={
+                        "mt-8 text-center text-sm " +
+                        "text-neutral-500 " +
+                        "dark:text-neutral-400"
+                    }
+                >
                     {isRegister
                         ? "Already have an account?"
-                        : "New to Frame?"}{" "}
+                        : "New to Frame?"}
+                    {" "}
+
                     <Link
-                        href={isRegister ? "/login" : "/register"}
-                        className="font-semibold text-[#E60023] hover:underline"
+                        href={
+                            isRegister
+                                ? "/login"
+                                : "/register"
+                        }
+                        className={
+                            "font-semibold text-[#E60023] " +
+                            "hover:underline"
+                        }
                     >
-                        {isRegister ? "Sign in" : "Create an account"}
+                        {isRegister
+                            ? "Sign in"
+                            : "Create an account"}
                     </Link>
                 </p>
             </div>
