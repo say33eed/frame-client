@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeAwareToaster } from "@/components/ThemeAwareToaster";
 
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
@@ -65,6 +66,7 @@ export default function RootLayout({
 
         {children}
 
+        <Footer />
         <ThemeToggle />
         <ThemeAwareToaster />
       </body>

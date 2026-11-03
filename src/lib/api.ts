@@ -54,6 +54,35 @@ export async function apiRequest<T>(
     const url = `${API_URL}${path.startsWith("/") ? path : `/${path}`
         }`;
 
+    // Obtain an HTTPOnly, short-lived JWT from the backend before mutations.
+    // Better Auth session cookie is verified by the server; JS never sees the JWT.
+    const needsJwt = ["POST", "PUT", "PATCH", "DELETE"].includes(method) &&
+        (path === "/api/studios" || path.startsWith("/api/studios/") ||
+         path === "/api/bookings" || path.startsWith("/api/bookings/"));
+
+    if (needsJwt) {
+        try {
+            const authResponse = await fetch(`${API_URL}/api/security/issue`, {
+                method: "POST",
+                credentials: "include",
+                signal: AbortSignal.timeout(timeoutMs),
+            });
+            if (!authResponse.ok) {
+                const authBody: unknown = await authResponse.json().catch(() => null);
+                const message = authBody && typeof authBody === "object" &&
+                    "message" in authBody && typeof authBody.message === "string"
+                    ? authBody.message : "Please sign in to continue.";
+                return { success: false, message, status: authResponse.status };
+            }
+        } catch {
+            return {
+                success: false,
+                message: "Unable to verify your secure session. Please try again.",
+                status: 503,
+            };
+        }
+    }
+
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
             const response = await fetch(url, {
