@@ -39,7 +39,7 @@ const accountNavigation = [
     },
     {
         label: "My Studio Listings",
-        href: "/my-studios",
+        href: "/my-listings",
         icon: List,
     },
     {
