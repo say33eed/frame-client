@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, type FormEvent } from "react";
 import Image from "next/image";
@@ -43,7 +43,7 @@ export default function Footer() {
     setBusy(true);
     setMessage("");
     try {
-      const api = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(/\/+$/, "");
+      const api = ((process.env.NODE_ENV === "production" ? "https://frame-client.vercel.app" : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"))).replace(/\/+$/, "");
       const response = await fetch(`${api}/api/newsletter`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
