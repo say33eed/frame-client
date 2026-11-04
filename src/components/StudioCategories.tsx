@@ -59,7 +59,7 @@ export default function StudioCategories() {
         <section
             id="studio-categories"
             aria-labelledby="categories-heading"
-            className="bg-neutral-50 px-5 py-20 sm:px-8 lg:py-28"
+            className="border bg-neutral-50 px-5 py-20 sm:px-8 lg:py-28"
         >
             <div className="mx-auto max-w-7xl">
                 <div className="mb-12 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">

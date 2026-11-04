@@ -41,7 +41,7 @@ export default function AboutUs() {
         <section
             id="about-us"
             aria-labelledby="about-us-heading"
-            className="scroll-mt-20 mt-24 bg-[#FAF9F8] dark:bg-[#111111] px-5 py-20 sm:px-8 lg:py-28"
+            className="scroll-mt-20 border bg-[#FAF9F8] dark:bg-[#111111] px-5 py-20 sm:px-8 lg:py-28"
         >
             <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>

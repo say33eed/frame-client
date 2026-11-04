@@ -1,6 +1,7 @@
 
 "use client";
 
+import FrameLoading from "@/components/FrameLoading";
 import { useCallback, useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
@@ -153,16 +154,7 @@ export default function StudioDetailsPage() {
     }, [loadStudio]);
 
     if (loading) {
-        return (
-            <main className="mx-auto max-w-7xl animate-pulse px-5 py-12 sm:px-8">
-                <div className="mb-7 h-9 w-2/3 rounded bg-neutral-200" />
-                <div className="aspect-[16/7] rounded-3xl bg-neutral-200" />
-                <div className="mt-10 grid gap-8 lg:grid-cols-3">
-                    <div className="h-80 rounded-2xl bg-neutral-100 lg:col-span-2" />
-                    <div className="h-80 rounded-2xl bg-neutral-100" />
-                </div>
-            </main>
-        );
+        return <FrameLoading variant="details" title="studio details" />;
     }
 
     if (!studio) {

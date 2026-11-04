@@ -4,16 +4,16 @@ import FeaturedStudios from "@/components/FeaturedStudios";
 import StudioCategories from "@/components/StudioCategories";
 import HowItWorks from "@/components/HowItWorks";
 import AboutUs from "@/components/AboutUs";
-import { getApiHealth } from "@/lib/api";
+// import { getApiHealth } from "@/lib/api";
 
 export default async function Home() {
-  let apiConnected = false;
-  let apiMessage = "Unable to connect to Frame API";
+  // let apiConnected = false;
+  // let apiMessage = "Unable to connect to Frame API";
 
   try {
-    const health = await getApiHealth();
-    apiConnected = health.success;
-    apiMessage = health.message;
+    // const health = await getApiHealth();
+    // apiConnected = health.success;
+    // apiMessage = health.message;
   } catch (error) {
     console.error("Frame API health check failed:", error);
   }
@@ -26,7 +26,7 @@ export default async function Home() {
       <FeaturedStudios />
       <HowItWorks />
       <AboutUs />
-      <main className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center text-black">
+      {/* <main className="flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center text-black">
         <h1 className="text-5xl font-semibold tracking-tight">
           Frame
         </h1>
@@ -51,7 +51,7 @@ export default async function Home() {
             {apiMessage}
           </p>
         </div>
-      </main>
+      </main> */}
     </>
   );
 }

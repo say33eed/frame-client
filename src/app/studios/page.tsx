@@ -1,6 +1,7 @@
 
 "use client";
 
+import StudioCardSkeleton from "@/components/StudioCardSkeleton";
 import {
     Suspense,
     useCallback,
@@ -497,25 +498,7 @@ function ExploreStudiosContent() {
 
                 {/* LOADING SKELETONS */}
                 {loading ? (
-                    <div className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
-                        {Array.from({
-                            length: 6,
-                        }).map((_, index) => (
-                            <div
-                                key={index}
-                                className="animate-pulse overflow-hidden rounded-2xl border border-neutral-200 bg-white"
-                            >
-                                <div className="aspect-[4/3] bg-neutral-200" />
-
-                                <div className="space-y-3 p-5">
-                                    <div className="h-4 w-1/3 rounded bg-neutral-200" />
-                                    <div className="h-6 w-4/5 rounded bg-neutral-200" />
-                                    <div className="h-4 w-2/3 rounded bg-neutral-200" />
-                                    <div className="h-11 rounded-xl bg-neutral-200" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <StudioCardSkeleton />
                 ) : filteredStudios.length > 0 ? (
 
                     /* STUDIO GRID */

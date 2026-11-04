@@ -1,6 +1,7 @@
 
 "use client";
 
+import FrameLoading from "@/components/FrameLoading";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -449,22 +450,7 @@ export default function MyBookingsPage() {
     }
 
     if (sessionLoading || !userId || loading) {
-        return (
-            <main className="min-h-[65vh] bg-neutral-50 px-5 py-12 sm:px-8">
-                <div className="mx-auto max-w-5xl animate-pulse">
-                    <div className="h-9 w-60 rounded-lg bg-neutral-200" />
-                    <div className="mt-4 h-5 w-80 max-w-full rounded bg-neutral-200" />
-                    <div className="mt-10 space-y-4">
-                        {[1, 2, 3].map((item) => (
-                            <div
-                                key={item}
-                                className="h-44 rounded-2xl bg-neutral-200"
-                            />
-                        ))}
-                    </div>
-                </div>
-            </main>
-        );
+        return <FrameLoading variant="dashboard" title="my bookings" />;
     }
 
     return (

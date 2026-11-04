@@ -1,6 +1,7 @@
 
 "use client";
 
+import StudioCardSkeleton from "@/components/StudioCardSkeleton";
 import { useCallback, useEffect, useState } from "react";
 import Link from "next/link";
 import {
@@ -91,7 +92,7 @@ export default function FeaturedStudios() {
         <section
             id="featured-studios"
             aria-labelledby="featured-heading"
-            className="bg-white px-5 py-20 sm:px-8 lg:py-28"
+            className="bg-white border px-5 py-20 sm:px-8 lg:py-28"
         >
             <div className="mx-auto max-w-7xl">
                 {/* ORIGINAL SECTION HEADER */}
@@ -124,27 +125,7 @@ export default function FeaturedStudios() {
 
                 {/* LOADING SKELETONS */}
                 {loading ? (
-                    <div
-                        className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
-                        aria-label="Loading featured studios"
-                        aria-busy="true"
-                    >
-                        {Array.from({ length: 6 }).map((_, index) => (
-                            <div
-                                key={index}
-                                className="animate-pulse overflow-hidden rounded-2xl border border-neutral-200 bg-white"
-                            >
-                                <div className="aspect-[4/3] bg-neutral-200" />
-
-                                <div className="space-y-4 p-5">
-                                    <div className="h-4 w-24 rounded bg-neutral-200" />
-                                    <div className="h-6 w-3/4 rounded bg-neutral-200" />
-                                    <div className="h-4 w-1/2 rounded bg-neutral-200" />
-                                    <div className="h-11 rounded-xl bg-neutral-200" />
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    <StudioCardSkeleton />
                 ) : error ? (
                     /* BACKEND UNAVAILABLE */
                     <div
