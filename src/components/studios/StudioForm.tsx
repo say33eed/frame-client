@@ -155,8 +155,8 @@ export default function StudioForm({
         useState<StudioFormValues>(INITIAL_VALUES);
 
     const [customAmenity, setCustomAmenity] = useState("");
-    const [imageFailed, setImageFailed] = useState(false);
     const [uploadingImage, setUploadingImage] = useState(false);
+    const [galleryUrlDraft, setGalleryUrlDraft] = useState("");
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
@@ -287,46 +287,108 @@ export default function StudioForm({
         }));
 
         if (field === "imageUrl") {
-            setImageFailed(false);
         }
     }
 
-    async function uploadStudioImage(file: File | undefined) {
-        if (!file) return;
-        if (!file.type.startsWith("image/")) {
-            toast.error("Please choose an image file.");
+    const galleryImages = [
+        ...new Set([
+            form.imageUrl.trim(),
+            ...form.galleryUrls.split(/\r?\n/).map((url) => url.trim()),
+        ].filter(Boolean)),
+    ];
+
+    function setGalleryImages(urls: string[]) {
+        const unique = [...new Set(urls.map((url) => url.trim()).filter(Boolean))];
+        setForm((previous) => ({
+            ...previous,
+            imageUrl: unique[0] || "",
+            galleryUrls: unique.slice(1).join("\n"),
+        }));
+    }
+
+    function removeGalleryImage(url: string) {
+        setGalleryImages(galleryImages.filter((item) => item !== url));
+        toast.success("Image removed from the form. Save to apply changes.");
+    }
+
+    function makeCoverImage(url: string) {
+        setGalleryImages([url, ...galleryImages.filter((item) => item !== url)]);
+    }
+
+    function addGalleryUrl() {
+        const url = galleryUrlDraft.trim();
+        try {
+            if (!["http:", "https:"].includes(new URL(url).protocol)) {
+                throw new Error("Invalid URL");
+            }
+        } catch {
+            toast.error("Enter a valid https:// or http:// image URL.");
             return;
         }
-        if (file.size > 10 * 1024 * 1024) {
-            toast.error("Image must be smaller than 10 MB.");
+        if (galleryImages.includes(url)) {
+            toast.error("This image is already in the gallery.");
+            return;
+        }
+        if (galleryImages.length >= 10) {
+            toast.error("A studio can have up to 10 images.");
+            return;
+        }
+        setGalleryImages([...galleryImages, url]);
+        setGalleryUrlDraft("");
+    }
+
+    async function uploadStudioImages(files: FileList | null) {
+        if (!files?.length) return;
+        const selected = Array.from(files);
+        if (galleryImages.length + selected.length > 10) {
+            toast.error(`You can add ${10 - galleryImages.length} more image(s).`);
+            return;
+        }
+        if (selected.some((file) => !file.type.startsWith("image/") || file.size > 10 * 1024 * 1024)) {
+            toast.error("Choose image files smaller than 10 MB each.");
             return;
         }
         const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
         if (!apiKey) {
-            toast.error("Image uploads are not configured. Add NEXT_PUBLIC_IMGBB_API_KEY to .env.local.");
+            toast.error("Image uploads are not configured. Add NEXT_PUBLIC_IMGBB_API_KEY.");
             return;
         }
         setUploadingImage(true);
+        const uploaded: string[] = [];
         try {
-            const data = new FormData();
-            data.append("image", file);
-            const response = await fetch(
-                `https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`,
-                { method: "POST", body: data }
-            );
-            const result: { success?: boolean; data?: { url?: string }; error?: { message?: string } } =
-                await response.json();
-            if (!response.ok || !result.success || !result.data?.url) {
-                throw new Error(result.error?.message || "Image upload failed.");
+            for (const file of selected) {
+                const data = new FormData();
+                data.append("image", file);
+                const response = await fetch(
+                    `https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`,
+                    { method: "POST", body: data }
+                );
+                const result: { success?: boolean; data?: { url?: string }; error?: { message?: string } } = await response.json();
+                if (!response.ok || !result.success || !result.data?.url) {
+                    throw new Error(result.error?.message || "Image upload failed.");
+                }
+                uploaded.push(result.data.url);
             }
-            updateField("imageUrl", result.data.url);
-            toast.success("Image uploaded successfully!");
+            setForm((previous) => {
+                const current = [previous.imageUrl, ...previous.galleryUrls.split(/\r?\n/)].map((url) => url.trim()).filter(Boolean);
+                const all = [...new Set([...current, ...uploaded])].slice(0, 10);
+                return { ...previous, imageUrl: all[0] || "", galleryUrls: all.slice(1).join("\n") };
+            });
+            toast.success(`${uploaded.length} image(s) uploaded.`);
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : "Image upload failed.");
+            if (uploaded.length) {
+                setForm((previous) => {
+                    const current = [previous.imageUrl, ...previous.galleryUrls.split(/\r?\n/)].map((url) => url.trim()).filter(Boolean);
+                    const all = [...new Set([...current, ...uploaded])].slice(0, 10);
+                    return { ...previous, imageUrl: all[0] || "", galleryUrls: all.slice(1).join("\n") };
+                });
+            }
+            toast.error(error instanceof Error ? error.message : "Upload failed.");
         } finally {
             setUploadingImage(false);
         }
     }
+
     function toggleAmenity(amenity: string) {
         setForm((previous) => ({
             ...previous,
@@ -799,92 +861,108 @@ export default function StudioForm({
                         </div>
                     </section>
 
-                    <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
-                        <div className="mb-7 border-b border-neutral-100 pb-5">
-                            <h2 className="text-xl font-semibold text-neutral-950">
-                                Studio Image
-                            </h2>
-                            <p className="mt-2 text-sm text-neutral-500">
-                                Use an image that accurately represents
-                                your studio.
+                    <section className="min-w-0 rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm dark:border-neutral-800 dark:bg-neutral-950 sm:p-8">
+                        <div className="mb-6 border-b border-neutral-100 pb-5 dark:border-neutral-800">
+                            <h2 className="text-xl font-semibold text-neutral-950 dark:text-white">Studio Images</h2>
+                            <p className="mt-2 text-sm text-neutral-500 dark:text-neutral-400">
+                                Upload photos or add an image link. The first photo is your cover image.
                             </p>
                         </div>
 
-                        <label className="mb-5 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-5 py-4 text-sm font-semibold text-neutral-800 transition hover:border-[#E60023] hover:text-[#E60023] focus-within:border-[#E60023] focus-within:ring-2 focus-within:ring-red-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100">
-                            <ImageIcon size={19} aria-hidden="true" />
-                            {uploadingImage ? "Uploading image..." : "Choose Image to Upload"}
-                            <input
-                                type="file"
-                                accept="image/*"
-                                className="sr-only"
-                                disabled={uploadingImage || submitting}
-                                onChange={(event) => {
-                                    void uploadStudioImage(event.target.files?.[0]);
-                                    event.target.value = "";
-                                }}
-                            />
-                        </label>
-                        <p className="mb-4 text-xs text-neutral-500 dark:text-neutral-400">
-                            JPG, PNG, WebP, or GIF, up to 10 MB. Or paste an image URL below.
-                        </p>
-                        <FieldLabel htmlFor="studio-image">
-                            Image URL
-                        </FieldLabel>
-                        <input
-                            id="studio-image"
-                            type="url"
-                            className={inputClass}
-                            placeholder="https://example.com/studio.jpg"
-                            value={form.imageUrl}
-                            onChange={(event) =>
-                                updateField("imageUrl", event.target.value)
-                            }
-                        />
-
-                        <div className="mt-5">
-                            <FieldLabel htmlFor="studio-gallery">Additional Gallery Image URLs (optional)</FieldLabel>
-                            <textarea
-                                id="studio-gallery"
-                                rows={4}
-                                className={`${inputClass} py-3`}
-                                placeholder={"https://example.com/studio-side.jpg\nhttps://example.com/studio-interior.jpg"}
-                                value={form.galleryUrls}
-                                onChange={(event) => updateField("galleryUrls", event.target.value)}
-                            />
-                            <p className="mt-2 text-xs text-neutral-500">One image URL per line, up to 9 additional images. The primary image above appears first in the gallery.</p>
-                            {form.galleryUrls.trim() && (
-                                <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
-                                    {[...new Set(form.galleryUrls.split(/\r?\n/).map((url) => url.trim()).filter(Boolean))].slice(0, 9).map((url) => (
-                                        // eslint-disable-next-line @next/next/no-img-element
-                                        <img key={url} src={url} alt="Additional studio gallery preview" className="aspect-square w-full rounded-lg border border-neutral-200 object-cover" />
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                        <div className="mt-5 flex aspect-[16/7] min-h-48 items-center justify-center overflow-hidden rounded-xl border border-dashed border-neutral-200 bg-neutral-50">
-                            {form.imageUrl.trim() && !imageFailed ? (
-                                // eslint-disable-next-line @next/next/no-img-element
-                                <img
-                                    src={form.imageUrl.trim()}
-                                    alt="Studio image preview"
-                                    className="h-full w-full object-cover"
-                                    onError={() => setImageFailed(true)}
+                        <div className="flex flex-col gap-3 sm:flex-row sm:items-stretch">
+                            <label className="flex min-h-12 cursor-pointer items-center justify-center gap-2 rounded-xl bg-[#E60023] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#C9001F] focus-within:ring-2 focus-within:ring-[#E60023] focus-within:ring-offset-2 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+                                {uploadingImage ? <LoaderCircle size={18} className="animate-spin" aria-hidden="true" /> : <ImageIcon size={18} aria-hidden="true" />}
+                                {uploadingImage ? "Uploading photos..." : "Upload photos"}
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    multiple
+                                    className="sr-only"
+                                    disabled={uploadingImage || submitting || galleryImages.length >= 10}
+                                    onChange={(event) => {
+                                        void uploadStudioImages(event.target.files);
+                                        event.target.value = "";
+                                    }}
                                 />
-                            ) : (
-                                <div className="px-5 text-center text-neutral-400">
-                                    <ImageIcon
-                                        size={34}
-                                        className="mx-auto"
-                                        aria-hidden="true"
-                                    />
-                                    <p className="mt-3 text-sm">
-                                        {imageFailed
-                                            ? "Unable to load image preview"
-                                            : "Your studio image preview will appear here"}
-                                    </p>
-                                </div>
-                            )}
+                            </label>
+                            <div className="flex min-w-0 flex-1 gap-2">
+                                <input
+                                    type="url"
+                                    aria-label="Image URL"
+                                    className={`${inputClass} min-w-0 flex-1 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white`}
+                                    placeholder="Or paste an image URL"
+                                    value={galleryUrlDraft}
+                                    onChange={(event) => setGalleryUrlDraft(event.target.value)}
+                                    onKeyDown={(event) => {
+                                        if (event.key === "Enter") {
+                                            event.preventDefault();
+                                            addGalleryUrl();
+                                        }
+                                    }}
+                                />
+                                <button
+                                    type="button"
+                                    onClick={addGalleryUrl}
+                                    disabled={uploadingImage || submitting || galleryImages.length >= 10}
+                                    className="flex h-12 shrink-0 items-center gap-1 rounded-xl border border-neutral-300 px-3 text-sm font-semibold text-neutral-900 transition hover:border-[#E60023] hover:text-[#E60023] disabled:opacity-50 dark:border-neutral-700 dark:text-white"
+                                >
+                                    <Plus size={17} aria-hidden="true" /> Add
+                                </button>
+                            </div>
                         </div>
+                        <p className="mt-3 text-xs text-neutral-500 dark:text-neutral-400">
+                            {galleryImages.length}/10 images · Up to 10 MB each · JPG, PNG, WebP or GIF.
+                            {isEditing ? " Changes are saved when you submit the form." : ""}
+                        </p>
+
+                        {galleryImages.length === 0 ? (
+                            <div className="mt-5 flex min-h-48 flex-col items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-4 text-center text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-400">
+                                <ImageIcon size={34} aria-hidden="true" />
+                                <p className="mt-3 text-sm">Your studio images will appear here</p>
+                            </div>
+                        ) : (
+                            <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+                                {galleryImages.map((url, index) => (
+                                    <div key={url} className="group relative min-w-0 overflow-hidden rounded-xl border border-neutral-200 bg-neutral-100 dark:border-neutral-700 dark:bg-neutral-900">
+                                        <div className="relative aspect-[4/3] overflow-hidden">
+                                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                                            <img
+                                                src={url}
+                                                alt={`Studio photo ${index + 1}`}
+                                                className="h-full w-full object-cover"
+                                            />
+                                            <button
+                                                type="button"
+                                                onClick={() => removeGalleryImage(url)}
+                                                disabled={uploadingImage || submitting}
+                                                aria-label={`Remove photo ${index + 1}`}
+                                                title="Remove photo"
+                                                className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/75 text-white transition hover:bg-[#E60023] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023] disabled:opacity-50"
+                                            >
+                                                <X size={18} aria-hidden="true" />
+                                            </button>
+                                        </div>
+                                        {index === 0 ? (
+                                            <div
+                                                aria-label="Current cover photo"
+                                                className="flex min-h-9 w-full items-center justify-center px-2 py-2 text-center text-xs font-semibold text-[#E60023]"
+                                            >
+                                                Cover
+                                            </div>
+                                        ) : (
+                                            <button
+                                                type="button"
+                                                onClick={() => makeCoverImage(url)}
+                                                disabled={uploadingImage || submitting}
+                                                className="min-h-9 w-full px-2 py-2 text-center text-xs font-semibold text-neutral-700 transition hover:text-[#E60023] disabled:opacity-50 dark:text-neutral-200"
+                                            >
+                                                Make cover
+                                            </button>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        )}
                     </section>
 
                     <section className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm sm:p-8">
@@ -1078,7 +1156,7 @@ export default function StudioForm({
 
                         <button
                             type="submit"
-                            disabled={submitting || categoriesLoading}
+                            disabled={submitting || uploadingImage || categoriesLoading}
                             className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#E60023] px-8 text-sm font-semibold text-white transition hover:bg-[#C9001F] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                             {submitting ? (
