@@ -51,6 +51,7 @@ type StudioFormValues = {
     maxCapacity: string;
     location: string;
     imageUrl: string;
+    galleryUrls: string;
     overview: string;
     amenities: string[];
 };
@@ -93,6 +94,7 @@ const INITIAL_VALUES: StudioFormValues = {
     maxCapacity: "",
     location: "",
     imageUrl: "",
+    galleryUrls: "",
     overview: "",
     amenities: [],
 };
@@ -154,6 +156,7 @@ export default function StudioForm({
 
     const [customAmenity, setCustomAmenity] = useState("");
     const [imageFailed, setImageFailed] = useState(false);
+    const [uploadingImage, setUploadingImage] = useState(false);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState("");
 
@@ -235,6 +238,7 @@ export default function StudioForm({
                 savedStudio.imageUrl ||
                 savedStudio.images?.[0] ||
                 "",
+            galleryUrls: (savedStudio.images || []).filter((url) => url !== (savedStudio.imageUrl || savedStudio.images?.[0])).join("\n"),
             overview:
                 savedStudio.overview ||
                 savedStudio.description ||
@@ -287,6 +291,42 @@ export default function StudioForm({
         }
     }
 
+    async function uploadStudioImage(file: File | undefined) {
+        if (!file) return;
+        if (!file.type.startsWith("image/")) {
+            toast.error("Please choose an image file.");
+            return;
+        }
+        if (file.size > 10 * 1024 * 1024) {
+            toast.error("Image must be smaller than 10 MB.");
+            return;
+        }
+        const apiKey = process.env.NEXT_PUBLIC_IMGBB_API_KEY;
+        if (!apiKey) {
+            toast.error("Image uploads are not configured. Add NEXT_PUBLIC_IMGBB_API_KEY to .env.local.");
+            return;
+        }
+        setUploadingImage(true);
+        try {
+            const data = new FormData();
+            data.append("image", file);
+            const response = await fetch(
+                `https://api.imgbb.com/1/upload?key=${encodeURIComponent(apiKey)}`,
+                { method: "POST", body: data }
+            );
+            const result: { success?: boolean; data?: { url?: string }; error?: { message?: string } } =
+                await response.json();
+            if (!response.ok || !result.success || !result.data?.url) {
+                throw new Error(result.error?.message || "Image upload failed.");
+            }
+            updateField("imageUrl", result.data.url);
+            toast.success("Image uploaded successfully!");
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Image upload failed.");
+        } finally {
+            setUploadingImage(false);
+        }
+    }
     function toggleAmenity(amenity: string) {
         setForm((previous) => ({
             ...previous,
@@ -338,6 +378,7 @@ export default function StudioForm({
 
         if (
             submitting ||
+            uploadingImage ||
             !session?.user ||
             (isEditing && !savedStudio)
         ) {
@@ -350,6 +391,21 @@ export default function StudioForm({
         const location = form.location.trim();
         const overview = form.overview.trim();
         const imageUrl = form.imageUrl.trim();
+        const extraImages = [...new Set(form.galleryUrls.split(/\r?\n/).map((url) => url.trim()).filter(Boolean))].filter((url) => url !== imageUrl);
+        if (extraImages.length > 9) {
+            showFormError("Add up to 9 additional gallery images.");
+            return;
+        }
+        for (const image of extraImages) {
+            try {
+                const url = new URL(image);
+                if (!["http:", "https:"].includes(url.protocol)) throw new Error("Invalid protocol");
+            } catch {
+                showFormError("Each gallery image must be a valid http(s) URL, one per line.");
+                return;
+            }
+        }
+        const images = [...new Set([imageUrl, ...extraImages].filter(Boolean))];
 
         const category = categories.find(
             (item) => item.slug === form.category
@@ -443,6 +499,7 @@ export default function StudioForm({
                     maxCapacity,
                     location,
                     imageUrl,
+                    images,
                     amenities: form.amenities,
                     overview,
                 }),
@@ -753,6 +810,23 @@ export default function StudioForm({
                             </p>
                         </div>
 
+                        <label className="mb-5 flex cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-neutral-300 bg-neutral-50 px-5 py-4 text-sm font-semibold text-neutral-800 transition hover:border-[#E60023] hover:text-[#E60023] focus-within:border-[#E60023] focus-within:ring-2 focus-within:ring-red-100 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100">
+                            <ImageIcon size={19} aria-hidden="true" />
+                            {uploadingImage ? "Uploading image..." : "Choose Image to Upload"}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className="sr-only"
+                                disabled={uploadingImage || submitting}
+                                onChange={(event) => {
+                                    void uploadStudioImage(event.target.files?.[0]);
+                                    event.target.value = "";
+                                }}
+                            />
+                        </label>
+                        <p className="mb-4 text-xs text-neutral-500 dark:text-neutral-400">
+                            JPG, PNG, WebP, or GIF, up to 10 MB. Or paste an image URL below.
+                        </p>
                         <FieldLabel htmlFor="studio-image">
                             Image URL
                         </FieldLabel>
@@ -767,6 +841,26 @@ export default function StudioForm({
                             }
                         />
 
+                        <div className="mt-5">
+                            <FieldLabel htmlFor="studio-gallery">Additional Gallery Image URLs (optional)</FieldLabel>
+                            <textarea
+                                id="studio-gallery"
+                                rows={4}
+                                className={`${inputClass} py-3`}
+                                placeholder={"https://example.com/studio-side.jpg\nhttps://example.com/studio-interior.jpg"}
+                                value={form.galleryUrls}
+                                onChange={(event) => updateField("galleryUrls", event.target.value)}
+                            />
+                            <p className="mt-2 text-xs text-neutral-500">One image URL per line, up to 9 additional images. The primary image above appears first in the gallery.</p>
+                            {form.galleryUrls.trim() && (
+                                <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-5">
+                                    {[...new Set(form.galleryUrls.split(/\r?\n/).map((url) => url.trim()).filter(Boolean))].slice(0, 9).map((url) => (
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img key={url} src={url} alt="Additional studio gallery preview" className="aspect-square w-full rounded-lg border border-neutral-200 object-cover" />
+                                    ))}
+                                </div>
+                            )}
+                        </div>
                         <div className="mt-5 flex aspect-[16/7] min-h-48 items-center justify-center overflow-hidden rounded-xl border border-dashed border-neutral-200 bg-neutral-50">
                             {form.imageUrl.trim() && !imageFailed ? (
                                 // eslint-disable-next-line @next/next/no-img-element
