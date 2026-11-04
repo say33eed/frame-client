@@ -281,8 +281,6 @@ The following section is intended for assignment evaluation.
 
 **Test Password:** aEDMtwHw4w6tvSV
 
-Use a dedicated test account for evaluation. Do not publish personal credentials, database passwords, authentication secrets, or private API keys.
-
 ---
 
 ## Project Highlights
