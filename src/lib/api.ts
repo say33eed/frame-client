@@ -185,3 +185,38 @@ export async function getApiHealth(): Promise<{
 
     return result.data;
 }
+
+/** Download a confirmed booking invoice using the existing authenticated session. */
+export async function downloadBookingInvoice(bookingId: string): Promise<ApiResult<true>> {
+    if (!API_URL || !/^[a-f\d]{24}$/i.test(bookingId)) {
+        return { success: false, message: "Invalid booking reference.", status: 400 };
+    }
+    try {
+        const response = await fetch(
+            `${API_URL}/api/bookings/${encodeURIComponent(bookingId)}/invoice`,
+            { method: "GET", credentials: "include", cache: "no-store", signal: AbortSignal.timeout(20000) }
+        );
+        if (!response.ok) {
+            const body: unknown = await response.json().catch(() => null);
+            const message = body && typeof body === "object" && "message" in body &&
+                typeof body.message === "string" ? body.message : "Unable to download invoice.";
+            return { success: false, message, status: response.status };
+        }
+        const contentType = response.headers.get("content-type") || "";
+        if (!contentType.includes("application/pdf")) {
+            return { success: false, message: "The server did not return a PDF.", status: 502 };
+        }
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = objectUrl;
+        link.download = `frame-invoice-${bookingId}.pdf`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => URL.revokeObjectURL(objectUrl), 60000);
+        return { success: true, data: true };
+    } catch {
+        return { success: false, message: "Could not download the invoice. Please try again.", status: 503 };
+    }
+}

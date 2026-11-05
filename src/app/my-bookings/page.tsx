@@ -15,13 +15,14 @@ import {
     LoaderCircle,
     MapPin,
     RefreshCw,
+    Download,
     X,
     XCircle,
 } from "lucide-react";
 import { toast } from "sonner";
 
 import { authClient } from "@/lib/auth-client";
-import { apiRequest } from "@/lib/api";
+import { apiRequest, downloadBookingInvoice } from "@/lib/api";
 
 type BookingStatus =
     | "Pending"
@@ -319,6 +320,7 @@ export default function MyBookingsPage() {
     const [error, setError] = useState("");
     const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
     const [cancelling, setCancelling] = useState(false);
+    const [downloadingId, setDownloadingId] = useState<string | null>(null);
 
     const cancellingRef = useRef(false);
 
@@ -446,6 +448,24 @@ export default function MyBookingsPage() {
         } finally {
             cancellingRef.current = false;
             setCancelling(false);
+        }
+    }
+
+    async function handleDownloadInvoice(bookingId: string) {
+        if (downloadingId) return;
+        setDownloadingId(bookingId);
+        try {
+            const result = await downloadBookingInvoice(bookingId);
+            if (result.success) {
+                toast.success("Invoice downloaded successfully.");
+            } else {
+                toast.error(result.message);
+                if (result.status === 401) {
+                    router.replace("/login?redirect=%2Fmy-bookings");
+                }
+            }
+        } finally {
+            setDownloadingId(null);
         }
     }
 
@@ -655,6 +675,22 @@ export default function MyBookingsPage() {
                                                     {money(booking.total)}
                                                 </p>
                                             </div>
+
+                                            {booking.status === "Confirmed" && (
+                                                <button
+                                                    type="button"
+                                                    disabled={downloadingId !== null}
+                                                    onClick={() => void handleDownloadInvoice(booking._id)}
+                                                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-4 text-xs font-semibold text-neutral-900 transition-colors hover:border-[#E60023] hover:text-[#E60023] disabled:cursor-wait disabled:opacity-60"
+                                                >
+                                                    {downloadingId === booking._id ? (
+                                                        <LoaderCircle size={15} className="animate-spin" />
+                                                    ) : (
+                                                        <Download size={15} />
+                                                    )}
+                                                    {downloadingId === booking._id ? "Preparing PDF..." : "Download Invoice"}
+                                                </button>
+                                            )}
 
                                             {booking.status === "Pending" && (
                                                 <button
