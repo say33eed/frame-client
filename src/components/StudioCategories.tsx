@@ -1,6 +1,5 @@
-
 "use client";
-
+import { homeButton } from "@/components/homeButtonStyles";
 import Link from "next/link";
 
 import {
@@ -59,7 +58,7 @@ export default function StudioCategories() {
         <section
             id="studio-categories"
             aria-labelledby="categories-heading"
-            className="border bg-neutral-50 px-5 py-20 sm:px-8 lg:py-28"
+            className="border-t border-neutral-200 bg-neutral-50 px-5 py-20 dark:border-white/10 dark:bg-[#151515] sm:px-8 lg:py-28"
         >
             <div className="mx-auto max-w-7xl">
                 <div className="mb-12 flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
@@ -70,12 +69,12 @@ export default function StudioCategories() {
 
                         <h2
                             id="categories-heading"
-                            className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl"
+                            className="text-3xl font-semibold tracking-tight text-neutral-950 dark:text-white sm:text-4xl"
                         >
                             Browse by Category
                         </h2>
 
-                        <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600">
+                        <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600 dark:text-neutral-400">
                             Whatever you&apos;re creating, find a space
                             that brings your vision to life.
                         </p>
@@ -83,9 +82,9 @@ export default function StudioCategories() {
 
                     <Link
                         href="/studios"
-                        className="inline-flex items-center gap-2 self-start text-sm font-semibold text-neutral-950 transition-colors hover:text-[#E60023]"
+                        className={homeButton.text}
                     >
-                        Explore all studios
+                        Explore studios
                         <ArrowUpRight size={18} aria-hidden="true" />
                     </Link>
                 </div>
@@ -107,26 +106,26 @@ export default function StudioCategories() {
                             <Link
                                 key={category.slug}
                                 href={href}
-                                className="group flex min-h-64 flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-7 transition-all duration-300 hover:-translate-y-1 hover:border-neutral-300 hover:shadow-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023]"
+                                className="group flex min-h-64 flex-col justify-between rounded-2xl border border-neutral-200 bg-white p-7 transition-colors hover:border-[#E60023]/50 dark:border-white/10 dark:bg-[#1C1C1C] dark:hover:border-[#E60023]/50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023]"
                             >
                                 <div className="flex items-start justify-between">
-                                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-neutral-100 text-neutral-900 transition-colors group-hover:bg-[#E60023] group-hover:text-white">
+                                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-red-50 text-[#E60023] transition-colors group-hover:bg-[#E60023] group-hover:text-white dark:bg-red-500/10 dark:group-hover:bg-[#E60023] dark:group-hover:text-white">
                                         <Icon size={26} aria-hidden="true" />
                                     </div>
 
                                     <ArrowUpRight
                                         size={20}
-                                        className="text-neutral-400 transition-colors group-hover:text-[#E60023]"
+                                        className="text-neutral-400 transition-colors group-hover:text-[#E60023] dark:text-neutral-400 dark:group-hover:text-white"
                                         aria-hidden="true"
                                     />
                                 </div>
 
                                 <div>
-                                    <h3 className="text-xl font-semibold tracking-tight text-neutral-950">
+                                    <h3 className="text-xl font-semibold tracking-tight text-neutral-950 dark:text-white">
                                         {category.name}
                                     </h3>
 
-                                    <p className="mt-2 text-sm leading-relaxed text-neutral-500">
+                                    <p className="mt-2 text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
                                         {design.description}
                                     </p>
                                 </div>

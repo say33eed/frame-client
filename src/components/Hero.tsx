@@ -1,6 +1,6 @@
-
 "use client";
 
+import { homeButton } from "@/components/homeButtonStyles";
 import { useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -136,14 +136,14 @@ export default function Hero() {
                     <div className="pointer-events-auto mt-10 flex flex-wrap items-center gap-4">
                         <Link
                             href="/studios"
-                            className="inline-flex min-h-12 items-center justify-center rounded-full bg-[#E60023] px-7 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F] focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E60023]"
+                            className={homeButton.filled}
                         >
                             Explore Studios
                         </Link>
 
                         <Link
                             href="/add-studio"
-                            className="inline-flex min-h-12 items-center justify-center rounded-full border border-white/50 px-7 text-sm font-semibold text-white transition-colors hover:bg-white/10 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#E60023]"
+                            className={homeButton.heroOutlined}
                         >
                             Host Your Space
                         </Link>

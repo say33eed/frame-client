@@ -1,3 +1,4 @@
+import { homeButton } from "@/components/homeButtonStyles";
 
 import Link from "next/link";
 // import { Button } from "@/components/ui/button";
@@ -41,7 +42,7 @@ export default function AboutUs() {
         <section
             id="about-us"
             aria-labelledby="about-us-heading"
-            className="scroll-mt-20 border bg-[#FAF9F8] dark:bg-[#111111] px-5 py-20 sm:px-8 lg:py-28"
+            className="scroll-mt-20 border-t border-neutral-200 bg-neutral-50 px-5 py-20 dark:border-white/10 dark:bg-[#151515] sm:px-8 lg:py-28"
         >
             <div className="mx-auto grid max-w-7xl items-center gap-12 lg:grid-cols-2 lg:gap-16">
                 <div>
@@ -51,19 +52,19 @@ export default function AboutUs() {
 
                     <h2
                         id="about-us-heading"
-                        className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-neutral-950 sm:text-4xl lg:text-[42px]"
+                        className="max-w-xl text-3xl font-bold leading-tight tracking-tight text-neutral-950 dark:text-white sm:text-4xl lg:text-[42px]"
                     >
                         Great Creative Work Starts with the Right Space.
                     </h2>
 
-                    <p className="mt-6 max-w-lg text-base leading-relaxed text-neutral-600">
+                    <p className="mt-6 max-w-lg text-base leading-relaxed text-neutral-600 dark:text-neutral-400">
                         Frame connects creators with inspiring studios
                         for photography, filmmaking, podcasting, and
                         more. We believe finding the right creative
                         environment should be simple.
                     </p>
 
-                    <p className="mt-4 max-w-lg text-base leading-relaxed text-neutral-600">
+                    <p className="mt-4 max-w-lg text-base leading-relaxed text-neutral-600 dark:text-neutral-400">
                         Whether you&apos;re searching for a space to
                         bring your ideas to life or sharing your own
                         studio with others, Frame helps bring creative
@@ -75,7 +76,7 @@ export default function AboutUs() {
                     <div className="mt-8 flex flex-wrap items-center gap-4">
                         <Link
                             href="/add-studio"
-                            className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[#E60023] px-7 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F]"
+                            className={homeButton.filled}
                         >
                             List Your Studio
                             <ArrowUpRight size={18} aria-hidden="true" />
@@ -83,7 +84,7 @@ export default function AboutUs() {
 
                         <Link
                             href="/studios"
-                            className="inline-flex min-h-12 items-center justify-center rounded-full border border-neutral-300 px-7 text-sm font-semibold text-neutral-950 transition-colors hover:border-[#E60023] hover:bg-red-50 hover:text-[#E60023] dark:border-neutral-600 dark:text-white dark:hover:border-[#E60023] dark:hover:bg-red-950/30"
+                            className={homeButton.outlined}
                         >
                             Explore Studios
                         </Link>
@@ -98,17 +99,17 @@ export default function AboutUs() {
                         return (
                             <div
                                 key={feature.title}
-                                className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-colors hover:border-red-200 dark:border-neutral-700 dark:bg-[#1c1c1c] dark:hover:border-red-800"
+                                className="rounded-2xl border border-neutral-200 bg-white p-6 dark:border-white/10 dark:bg-[#1C1C1C]"
                             >
                                 <div className="mb-5 flex h-11 w-11 items-center justify-center rounded-xl bg-red-50 text-[#E60023]">
                                     <Icon size={21} aria-hidden="true" />
                                 </div>
 
-                                <h3 className="text-base font-semibold leading-snug text-neutral-950">
+                                <h3 className="text-base font-semibold leading-snug text-neutral-950 dark:text-white">
                                     {feature.title}
                                 </h3>
 
-                                <p className="mt-3 text-sm leading-relaxed text-neutral-600">
+                                <p className="mt-3 text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
                                     {feature.description}
                                 </p>
                             </div>

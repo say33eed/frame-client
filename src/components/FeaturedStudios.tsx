@@ -1,5 +1,8 @@
 "use client";
 
+import { homeButton } from "@/components/homeButtonStyles";
+
+
 import WishlistButton from "@/components/wishlist/WishlistButton";
 
 import StudioCardSkeleton from "@/components/StudioCardSkeleton";
@@ -93,7 +96,7 @@ export default function FeaturedStudios() {
         <section
             id="featured-studios"
             aria-labelledby="featured-heading"
-            className="bg-white border px-5 py-20 sm:px-8 lg:py-28"
+            className="border-t border-neutral-200 bg-white px-5 py-20 dark:border-white/10 dark:bg-[#111111] sm:px-8 lg:py-28"
         >
             <div className="mx-auto max-w-7xl">
                 {/* ORIGINAL SECTION HEADER */}
@@ -105,21 +108,21 @@ export default function FeaturedStudios() {
 
                         <h2
                             id="featured-heading"
-                            className="text-3xl font-semibold tracking-tight text-neutral-950 sm:text-4xl"
+                            className="text-3xl font-semibold tracking-tight text-neutral-950 dark:text-white sm:text-4xl"
                         >
                             Featured Studios
                         </h2>
 
-                        <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600">
+                        <p className="mt-4 max-w-xl text-base leading-relaxed text-neutral-600 dark:text-neutral-400">
                             Explore spaces made for your next big creative idea.
                         </p>
                     </div>
 
                     <Link
                         href="/studios"
-                        className="inline-flex items-center gap-2 self-start text-sm font-semibold text-neutral-950 transition-colors hover:text-[#E60023]"
+                        className={homeButton.text}
                     >
-                        View all studios
+                        Explore studios
                         <ArrowUpRight size={18} aria-hidden="true" />
                     </Link>
                 </div>
@@ -131,17 +134,17 @@ export default function FeaturedStudios() {
                     /* BACKEND UNAVAILABLE */
                     <div
                         role="status"
-                        className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-12 text-center"
+                        className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-12 text-center dark:border-white/10 dark:bg-[#1C1C1C]"
                     >
                         <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-neutral-500 shadow-sm">
                             <WifiOff size={25} aria-hidden="true" />
                         </div>
 
-                        <h3 className="text-xl font-semibold text-neutral-950">
+                        <h3 className="text-xl font-semibold text-neutral-950 dark:text-white">
                             Featured studios are temporarily unavailable
                         </h3>
 
-                        <p className="mt-3 max-w-md text-sm leading-relaxed text-neutral-600">
+                        <p className="mt-3 max-w-md text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
                             We couldn&apos;t load the featured spaces right now.
                             Please try again shortly.
                         </p>
@@ -149,7 +152,7 @@ export default function FeaturedStudios() {
                         <button
                             type="button"
                             onClick={() => void loadFeaturedStudios()}
-                            className="mt-7 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#E60023] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F]"
+                            className={homeButton.filled}
                         >
                             <RefreshCw size={16} aria-hidden="true" />
                             Try Again
@@ -157,23 +160,23 @@ export default function FeaturedStudios() {
                     </div>
                 ) : studios.length === 0 ? (
                     /* ORIGINAL EMPTY STATE */
-                    <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-12 text-center">
+                    <div className="flex min-h-72 flex-col items-center justify-center rounded-2xl border border-neutral-200 bg-neutral-50 px-6 py-12 text-center dark:border-white/10 dark:bg-[#1C1C1C]">
                         <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-white text-neutral-500 shadow-sm">
                             <Camera size={25} aria-hidden="true" />
                         </div>
 
-                        <h3 className="text-xl font-semibold text-neutral-950">
+                        <h3 className="text-xl font-semibold text-neutral-950 dark:text-white">
                             Inspiring spaces are coming soon
                         </h3>
 
-                        <p className="mt-3 max-w-md text-sm leading-relaxed text-neutral-600">
+                        <p className="mt-3 max-w-md text-sm leading-relaxed text-neutral-600 dark:text-neutral-400">
                             Featured studios will appear here as hosts publish
                             their spaces on Frame.
                         </p>
 
                         <Link
                             href="/studios"
-                            className="mt-7 inline-flex min-h-11 items-center justify-center rounded-full bg-[#E60023] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F]"
+                            className={homeButton.filled}
                         >
                             Explore Studios
                         </Link>
@@ -184,7 +187,7 @@ export default function FeaturedStudios() {
                         {studios.map((studio) => (
                             <article
                                 key={studio._id}
-                                className="group overflow-hidden rounded-2xl border border-neutral-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:border-red-300 hover:shadow-lg dark:hover:border-red-800"
+                                className="overflow-hidden rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-[#1C1C1C]"
                             >
                                 <div className="relative aspect-[4/3] overflow-hidden bg-neutral-100">
                                     {studio.imageUrl ? (
@@ -193,7 +196,7 @@ export default function FeaturedStudios() {
                                             src={studio.imageUrl}
                                             alt={getTitle(studio)}
                                             loading="lazy"
-                                            className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                            className="h-full w-full object-cover"
                                         />
                                     ) : (
                                         <div className="flex h-full flex-col items-center justify-center gap-3 text-neutral-400">
@@ -223,7 +226,7 @@ export default function FeaturedStudios() {
                                 </div>
 
                                 <div className="p-6">
-                                    <p className="flex items-center gap-1.5 text-sm text-neutral-500">
+                                    <p className="flex items-center gap-1.5 text-sm text-neutral-500 dark:text-neutral-400">
                                         <MapPin
                                             size={15}
                                             className="shrink-0 text-[#E60023]"
@@ -234,13 +237,13 @@ export default function FeaturedStudios() {
                                         </span>
                                     </p>
 
-                                    <h3 className="mt-3 truncate text-xl font-semibold tracking-tight text-neutral-950 transition-colors group-hover:text-[#E60023]">
+                                    <h3 className="mt-3 truncate text-xl font-semibold tracking-tight text-neutral-950 dark:text-white">
                                         {getTitle(studio)}
                                     </h3>
 
-                                    <div className="mt-5 flex items-center justify-between border-t border-neutral-100 pt-4">
-                                        <p className="text-sm text-neutral-500">
-                                            <span className="text-xl font-bold text-neutral-950">
+                                    <div className="mt-5 flex items-center justify-between border-t border-neutral-200 pt-4 dark:border-white/10">
+                                        <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                            <span className="text-xl font-bold text-neutral-950 dark:text-white">
                                                 ${getPrice(studio).toLocaleString("en-US")}
                                             </span>
                                             {" "}/ hr
@@ -248,7 +251,7 @@ export default function FeaturedStudios() {
 
                                         <Link
                                             href={`/studios/${encodeURIComponent(studio._id)}`}
-                                            className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#E60023] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023]"
+                                            className={homeButton.filled}
                                         >
                                             View Details
                                             <ArrowRight size={16} aria-hidden="true" />
