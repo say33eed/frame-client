@@ -7,7 +7,7 @@ import Navbar from "@/components/Navbar";
 import ServerConnectionStatus from "@/components/ServerConnectionStatus";
 import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import Footer from "@/components/Footer";
-import ThemeToggle from "@/components/ThemeToggle";
+// import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -70,7 +70,7 @@ export default function RootLayout({
           <Footer />
         </WishlistProvider>
         <ServerConnectionStatus />
-        <ThemeToggle />
+        {/* <ThemeToggle /> */}
         <ThemeAwareToaster />
       </body>
     </html>

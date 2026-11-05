@@ -15,7 +15,9 @@ export default function ThemeToggle() {
         const initial: Theme =
             saved === "dark" || saved === "light"
                 ? saved
-                : window.matchMedia("(prefers-color-scheme: dark)").matches
+                : window.matchMedia(
+                    "(prefers-color-scheme: dark)"
+                ).matches
                     ? "dark"
                     : "light";
 
@@ -25,25 +27,36 @@ export default function ThemeToggle() {
                 initial === "dark"
             );
 
-            document.documentElement.style.colorScheme = initial;
+            document.documentElement.style.colorScheme =
+                initial;
+
             setTheme(initial);
         });
 
-        return () => window.cancelAnimationFrame(frame);
+        return () => {
+            window.cancelAnimationFrame(frame);
+        };
     }, []);
 
     function toggleTheme() {
-        const next: Theme = theme === "dark" ? "light" : "dark";
+        if (theme === null) return;
+
+        const next: Theme =
+            theme === "dark" ? "light" : "dark";
 
         document.documentElement.classList.toggle(
             "dark",
             next === "dark"
         );
 
-        document.documentElement.style.colorScheme = next;
+        document.documentElement.style.colorScheme =
+            next;
+
         localStorage.setItem("frame-theme", next);
         setTheme(next);
     }
+
+    const isDark = theme === "dark";
 
     return (
         <button
@@ -51,21 +64,51 @@ export default function ThemeToggle() {
             onClick={toggleTheme}
             disabled={theme === null}
             aria-label={
-                theme === "dark"
+                isDark
                     ? "Switch to light mode"
                     : "Switch to dark mode"
             }
             title={
-                theme === "dark"
+                isDark
                     ? "Switch to light mode"
                     : "Switch to dark mode"
             }
-            className="fixed bottom-5 right-5 z-40 flex size-12 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-900 shadow-lg transition-all hover:scale-105 hover:border-[#E60023] hover:text-[#E60023] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023] disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white dark:hover:text-[#E60023]"
+            className="
+        group inline-flex h-11 w-11 shrink-0
+        items-center justify-center rounded-xl
+        bg-neutral-100 text-neutral-900
+        transition-colors duration-200
+        hover:bg-neutral-200
+        focus-visible:outline-2
+        focus-visible:outline-offset-2
+        focus-visible:outline-[#E60023]
+        disabled:cursor-not-allowed
+        disabled:opacity-50
+        dark:bg-neutral-800
+        dark:text-white
+        dark:hover:bg-neutral-700
+      "
         >
-            {theme === "dark" ? (
-                <Sun size={21} />
+            {isDark ? (
+                <Sun
+                    size={21}
+                    aria-hidden="true"
+                    className="
+            text-white
+            transition-colors duration-200
+            group-hover:!text-[#E60023]
+          "
+                />
             ) : (
-                <Moon size={21} />
+                <Moon
+                    size={21}
+                    aria-hidden="true"
+                    className="
+            text-neutral-900
+            transition-colors duration-200
+            group-hover:!text-[#E60023]
+          "
+                />
             )}
         </button>
     );
