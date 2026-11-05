@@ -1,5 +1,7 @@
 "use client";
 
+import FrameSelect from "@/components/ui/FrameSelect";
+
 import WishlistButton from "@/components/wishlist/WishlistButton";
 
 import StudioCardSkeleton from "@/components/StudioCardSkeleton";
@@ -337,32 +339,18 @@ function ExploreStudiosContent() {
                             Search
                         </button>
 
-                        <select
+                        <FrameSelect
+                            label="Sort studios"
+                            className="w-full lg:w-60"
                             value={sort}
-                            onChange={(event) =>
-                                setSort(
-                                    event.target.value as SortOption
-                                )
-                            }
-                            aria-label="Sort studios"
-                            className="h-12 rounded-xl border border-neutral-200 bg-white px-4 text-sm font-medium outline-none focus:border-[#E60023] lg:min-w-48"
-                        >
-                            <option value="newest">
-                                Sort: Newest Listings
-                            </option>
-
-                            <option value="price-low">
-                                Price: Low to High
-                            </option>
-
-                            <option value="price-high">
-                                Price: High to Low
-                            </option>
-
-                            <option value="rating">
-                                Highest Rated
-                            </option>
-                        </select>
+                            onValueChange={(nextValue) => setSort(nextValue as SortOption)}
+                            options={[
+                                { value: "newest", label: "Sort: Newest Listings" },
+                                { value: "price-low", label: "Price: Low to High" },
+                                { value: "price-high", label: "Price: High to Low" },
+                                { value: "rating", label: "Highest Rated" },
+                            ]}
+                        />
                     </form>
 
                     <div className="mt-4 flex flex-col justify-between gap-4 border-t border-neutral-100 pt-4 xl:flex-row xl:items-center">

@@ -73,20 +73,49 @@ type AccountUser = {
   image?: string | null;
 };
 
+/*
+ * Shared navigation colors.
+ *
+ * LIGHT MODE:
+ * Selected: stronger soft Frame-red background + black text.
+ * Hover: visible neutral gray background.
+ *
+ * DARK MODE:
+ * Preserves the existing dark-red selected background,
+ * white selected text, and translucent hover.
+ */
 const activeLink =
-  "bg-red-50 text-neutral-950 hover:bg-red-100 dark:bg-[#49151C] dark:text-white dark:hover:bg-[#5B1922]";
+  "bg-[#F4CDD3] text-neutral-950 " +
+  "hover:bg-[#EFB6C0] hover:text-neutral-950 " +
+  "dark:bg-[#49151C] dark:text-white " +
+  "dark:hover:bg-[#5B1922] dark:hover:text-white";
 
 const inactiveLink =
-  "text-neutral-800 hover:bg-neutral-100 hover:text-neutral-950 dark:text-neutral-100 dark:hover:bg-white/10 dark:hover:text-white";
+  "text-neutral-800 " +
+  "hover:bg-[#E8E8EB] hover:text-neutral-950 " +
+  "dark:text-neutral-100 " +
+  "dark:hover:bg-white/10 dark:hover:text-white";
 
 const drawerLinkBase =
-  "group flex min-h-14 w-full items-center gap-4 rounded-2xl px-5 py-4 text-[15px] font-semibold tracking-[-0.01em] transition-all duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023]";
+  "group flex min-h-14 w-full items-center gap-4 " +
+  "rounded-2xl px-5 py-4 text-[15px] font-semibold " +
+  "tracking-[-0.01em] transition-colors duration-200 " +
+  "focus-visible:outline-2 focus-visible:outline-offset-2 " +
+  "focus-visible:outline-[#E60023]";
 
 const desktopLinkBase =
-  "flex min-h-12 w-full items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors duration-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023]";
+  "flex min-h-12 w-full items-center gap-3 " +
+  "rounded-xl px-4 py-3 text-sm font-medium " +
+  "transition-colors duration-200 " +
+  "focus-visible:outline-2 focus-visible:outline-offset-2 " +
+  "focus-visible:outline-[#E60023]";
 
 const menuIconButtonStyle =
-  "group flex h-11 w-11 items-center justify-center rounded-xl bg-neutral-100/70 text-neutral-900 transition-colors duration-200 hover:bg-neutral-200 focus-visible:outline-2 focus-visible:outline-[#E60023] dark:bg-white/5 dark:text-white dark:hover:bg-white/10";
+  "group flex h-11 w-11 items-center justify-center " +
+  "rounded-xl bg-neutral-100/70 text-neutral-900 " +
+  "transition-colors duration-200 hover:bg-neutral-200 " +
+  "focus-visible:outline-2 focus-visible:outline-[#E60023] " +
+  "dark:bg-white/5 dark:text-white dark:hover:bg-white/10";
 
 function isCurrentRoute(
   pathname: string,
@@ -194,7 +223,7 @@ function SignOutButton({
         type="button"
         disabled={busy}
         onClick={() => void signOut()}
-        className={`flex w-full items-center gap-3 rounded-2xl text-left font-semibold text-[#C9001F] transition-colors duration-200 hover:bg-red-50 focus-visible:outline-2 focus-visible:outline-[#E60023] disabled:cursor-wait disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-950/30 ${mobile
+        className={`flex w-full items-center gap-3 rounded-2xl text-left font-semibold text-[#C9001F] transition-colors duration-200 hover:bg-[#F4CDD3] focus-visible:outline-2 focus-visible:outline-[#E60023] disabled:cursor-wait disabled:opacity-60 dark:text-red-400 dark:hover:bg-red-950/30 ${mobile
             ? "min-h-14 px-5 py-4 text-[15px]"
             : "min-h-12 px-4 py-3 text-sm"
           }`}
@@ -355,7 +384,7 @@ function DesktopAccountMenu({
             })}
           </nav>
 
-          <div className="border-t border-neutral-200/70 pt-2 dark:border-white/10">
+          <div className="border-t border-neutral-200/70 pt-2">
             <SignOutButton onSuccess={close} />
           </div>
         </div>
@@ -649,7 +678,7 @@ export default function Navbar() {
                   Frame
                 </span>
 
-                {/* Close button — exactly matches hamburger */}
+                {/* Close button matches hamburger */}
                 <button
                   ref={closeButtonRef}
                   type="button"

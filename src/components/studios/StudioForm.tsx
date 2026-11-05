@@ -1,6 +1,8 @@
 
 "use client";
 
+import FrameSelect from "@/components/ui/FrameSelect";
+
 import {
     useEffect,
     useMemo,
@@ -734,26 +736,17 @@ export default function StudioForm({
                                 <FieldLabel htmlFor="studio-category">
                                     Studio Category *
                                 </FieldLabel>
-                                <select
+                                <FrameSelect
                                     id="studio-category"
-                                    className={inputClass}
+                                    label="Studio Category"
                                     required
+                                    className="w-full"
                                     value={form.category}
                                     disabled={categoriesLoading}
-                                    onChange={(event) =>
-                                        updateField("category", event.target.value)
-                                    }
-                                >
-                                    <option value="">Select a category</option>
-                                    {categories.map((category) => (
-                                        <option
-                                            key={category.slug}
-                                            value={category.slug}
-                                        >
-                                            {category.name}
-                                        </option>
-                                    ))}
-                                </select>
+                                    onValueChange={(nextValue) => updateField("category", nextValue)}
+                                    placeholder="Select a category"
+                                    options={[{ value: "", label: "Select a category" }, ...categories.map((category) => ({ value: category.slug, label: category.name }))]}
+                                />
 
                                 {usingFallback && (
                                     <p className="mt-2 text-xs text-amber-700">

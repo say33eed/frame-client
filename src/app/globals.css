@@ -169,8 +169,19 @@ html.dark select option { background-color: #262626; color: #fafafa; }
 :where(input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]),textarea,select,[role=combobox]):focus {
   border-color: #e60023 !important;
   outline: 2px solid transparent;
-  box-shadow: 0 0 0 3px rgb(230 0 35 / 20%) !important;
+  box-shadow: none !important;
 }
 :where(button,a,summary,[role=button]):focus-visible { outline: 2px solid #e60023; outline-offset: 3px; }
 :where(button,a,summary,input,select,textarea) { transition: background-color 180ms ease, border-color 180ms ease, color 180ms ease, box-shadow 180ms ease; }
 @media (prefers-reduced-motion: reduce) { :where(button,a,summary,input,select,textarea) { transition-duration: 0.01ms; } }
+
+/* FRAME single-border focus: form controls only.
+   Placed last to override component focus rings and browser outlines. */
+html :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), textarea, select, [role="combobox"]):focus,
+html :is(input:not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="file"]), textarea, select, [role="combobox"]):focus-visible {
+  border-color: #e60023 !important;
+  outline: none !important;
+  box-shadow: none !important;
+  --tw-ring-shadow: 0 0 #0000 !important;
+  --tw-ring-offset-shadow: 0 0 #0000 !important;
+}

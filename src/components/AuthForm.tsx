@@ -97,13 +97,13 @@ const inputClass =
     "placeholder:text-neutral-400 " +
     "hover:border-neutral-300 " +
     "focus:border-[#E60023] focus:bg-white " +
-    "focus:ring-4 focus:ring-[#E60023]/10 " +
+    "  " +
     "dark:border-white/10 dark:bg-white/[0.04] " +
     "dark:text-white dark:placeholder:text-neutral-500 " +
     "dark:hover:border-white/20 " +
     "dark:focus:border-[#E60023] " +
     "dark:focus:bg-white/[0.06] " +
-    "dark:focus:ring-[#E60023]/15";
+    "";
 
 const labelClass =
     "mb-2 block text-[13px] font-semibold " +

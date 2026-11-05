@@ -238,7 +238,7 @@ export default function BookingModal({
     }
 
     const fieldClass =
-        "mt-2 h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-sm font-normal text-neutral-950 outline-none transition-colors focus:border-[#E60023] focus:ring-2 focus:ring-red-100";
+        "mt-2 h-12 w-full rounded-xl border border-neutral-200 bg-neutral-50 px-4 text-sm font-normal text-neutral-950 outline-none transition-colors focus:border-[#E60023]  ";
 
     return (
         <div

@@ -254,7 +254,7 @@ export default function Footer() {
                       setMessage("");
                       setSubscribed(false);
                     }}
-                    className="h-12 w-full rounded-xl border border-neutral-300 bg-white pr-3 pl-10 text-sm text-neutral-950 outline-none transition focus:border-[#E60023] focus:ring-2 focus:ring-red-100 disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500 dark:focus:ring-red-950"
+                    className="h-12 w-full rounded-xl border border-neutral-300 bg-white pr-3 pl-10 text-sm text-neutral-950 outline-none transition focus:border-[#E60023]   disabled:opacity-60 dark:border-neutral-700 dark:bg-neutral-900 dark:text-white dark:placeholder:text-neutral-500 "
                   />
                 </div>
 
