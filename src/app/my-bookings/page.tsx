@@ -666,7 +666,8 @@ export default function MyBookingsPage() {
                                                 )}
                                         </div>
 
-                                        <div className="flex shrink-0 flex-col justify-between gap-5 border-t border-neutral-100 pt-4 md:min-w-40 md:items-end md:border-l md:border-t-0 md:py-0 md:pl-5">
+                                        {/* Price and actions: no desktop vertical divider */}
+                                        <div className="flex shrink-0 flex-col justify-between gap-5 border-t border-neutral-100 pt-4 md:min-w-40 md:items-end md:border-t-0 md:py-0 md:pl-5">
                                             <div className="md:text-right">
                                                 <p className="text-xs text-neutral-400">
                                                     Estimated total
@@ -682,7 +683,7 @@ export default function MyBookingsPage() {
                                                     type="button"
                                                     disabled={downloadingId !== null}
                                                     onClick={() => void handleDownloadInvoice(booking._id)}
-                                                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-4 text-xs font-semibold text-neutral-900 transition-colors hover:border-[#E60023] hover:text-[#E60023] disabled:cursor-wait disabled:opacity-60"
+                                                    className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-4 text-xs font-semibold text-neutral-900 transition-colors duration-200 hover:border-[#E60023] hover:bg-[#F4CDD3] hover:text-[#E60023] focus-visible:border-[#E60023] focus-visible:outline-none disabled:cursor-wait disabled:opacity-60 dark:border-white/20 dark:bg-[#242426] dark:text-white dark:hover:border-[#E60023] dark:hover:bg-[#49151C] dark:hover:text-[#FF6B7A]"
                                                 >
                                                     {downloadingId === booking._id ? (
                                                         <LoaderCircle size={15} className="animate-spin" />
