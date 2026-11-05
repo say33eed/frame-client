@@ -15,6 +15,7 @@ import {
     LayoutDashboard,
 } from "lucide-react";
 import FrameLoading from "@/components/FrameLoading";
+import HostBookingRequests from "@/components/HostBookingRequests";
 import { authClient } from "@/lib/auth-client";
 import { apiRequest } from "@/lib/api";
 
@@ -493,6 +494,8 @@ export default function DashboardPage() {
                         </div>
                     </section>
                 </div>
+
+                <HostBookingRequests userId={userId || ""} />
 
                 {!loading &&
                     !bookingsError &&
