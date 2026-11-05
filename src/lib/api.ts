@@ -58,7 +58,8 @@ export async function apiRequest<T>(
     // Better Auth session cookie is verified by the server; JS never sees the JWT.
     const needsJwt = ["POST", "PUT", "PATCH", "DELETE"].includes(method) &&
         (path === "/api/studios" || path.startsWith("/api/studios/") ||
-         path === "/api/bookings" || path.startsWith("/api/bookings/"));
+         path === "/api/bookings" || path.startsWith("/api/bookings/") ||
+         path.startsWith("/api/wishlist/"));
 
     if (needsJwt) {
         try {

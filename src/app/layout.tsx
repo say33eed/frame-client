@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeAwareToaster } from "@/components/ThemeAwareToaster";
 
 import Navbar from "@/components/Navbar";
+import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
 import "./globals.css";
@@ -62,11 +63,11 @@ export default function RootLayout({
       </head>
 
       <body className="flex min-h-full flex-col">
-        <Navbar />
-
-        {children}
-
-        <Footer />
+        <WishlistProvider>
+          <Navbar />
+          {children}
+          <Footer />
+        </WishlistProvider>
         <ThemeToggle />
         <ThemeAwareToaster />
       </body>

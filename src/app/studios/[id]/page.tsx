@@ -1,5 +1,6 @@
-
 "use client";
+
+import WishlistButton from "@/components/wishlist/WishlistButton";
 
 import FrameLoading from "@/components/FrameLoading";
 import { useCallback, useEffect, useState } from "react";
@@ -261,6 +262,8 @@ export default function StudioDetailsPage() {
                             {titleOf(studio)}
                         </h1>
                     </div>
+
+                    <WishlistButton studioId={studio._id} />
 
                     <button
                         type="button"

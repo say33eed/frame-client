@@ -1,5 +1,6 @@
-
 "use client";
+
+import WishlistButton from "@/components/wishlist/WishlistButton";
 
 import StudioCardSkeleton from "@/components/StudioCardSkeleton";
 import {
@@ -524,6 +525,8 @@ function ExploreStudiosContent() {
                                                 Studio image coming soon
                                             </div>
                                         )}
+
+                                        <WishlistButton studioId={studio._id} className="absolute right-4 top-4 z-10" />
 
                                         <span className="absolute left-4 top-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 dark:bg-neutral-900/95 dark:text-white shadow-sm">
                                             {studio.category}
