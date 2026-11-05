@@ -1,4 +1,6 @@
 "use client";
+import { hasStudioRating } from "@/lib/studio-rating";
+
 
 import FrameSelect from "@/components/ui/FrameSelect";
 
@@ -40,6 +42,7 @@ type Studio = {
     maxCapacity?: number;
     imageUrl?: string;
     rating?: number;
+    reviewCount?: number;
     overview?: string;
     description?: string;
     createdAt?: string;
@@ -533,8 +536,7 @@ function ExploreStudiosContent() {
                                             </span>
                                         </span>
 
-                                        {typeof studio.rating ===
-                                            "number" && (
+                                        {hasStudioRating(studio.rating, studio.reviewCount) ? (
                                                 <span className="absolute bottom-4 right-4 inline-flex items-center gap-1 rounded-lg bg-neutral-950/90 px-2.5 py-1.5 text-xs font-semibold text-white dark:bg-black/90">
                                                     <Star
                                                         size={13}
@@ -544,6 +546,8 @@ function ExploreStudiosContent() {
                                                         1
                                                     )}
                                                 </span>
+                                            ) : (
+                                                <span className="absolute bottom-4 right-4 rounded-lg bg-neutral-950/90 px-2.5 py-1.5 text-xs font-semibold text-white dark:bg-black/90">Not yet rated</span>
                                             )}
                                     </div>
 

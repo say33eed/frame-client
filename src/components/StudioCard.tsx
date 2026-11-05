@@ -1,3 +1,4 @@
+import { hasStudioRating } from "@/lib/studio-rating";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -17,6 +18,7 @@ export type StudioCardData = {
     currency?: string;
     imageUrl?: string;
     rating?: number;
+    reviewCount?: number;
 };
 
 type StudioCardProps = {
@@ -63,7 +65,7 @@ export default function StudioCard({
                             {studio.category}
                         </span>
 
-                        {studio.rating !== undefined && (
+                        {hasStudioRating(studio.rating, studio.reviewCount) ? (
                             <span className="inline-flex items-center gap-1 text-sm font-medium text-neutral-800">
                                 <Star
                                     size={14}
@@ -72,6 +74,8 @@ export default function StudioCard({
                                 />
                                 {studio.rating.toFixed(1)}
                             </span>
+                        ) : (
+                            <span className="text-xs text-neutral-500">Not yet rated</span>
                         )}
                     </div>
 

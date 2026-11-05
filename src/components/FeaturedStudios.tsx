@@ -1,4 +1,6 @@
 "use client";
+import { hasStudioRating } from "@/lib/studio-rating";
+
 
 import { homeButton } from "@/components/homeButtonStyles";
 
@@ -30,6 +32,7 @@ type Studio = {
     pricePerHour?: number;
     imageUrl?: string;
     rating?: number;
+    reviewCount?: number;
 };
 
 type FeaturedResponse = {
@@ -213,7 +216,7 @@ export default function FeaturedStudios() {
                                         {studio.category || "Creative Space"}
                                     </span>
 
-                                    {typeof studio.rating === "number" && (
+                                    {hasStudioRating(studio.rating, studio.reviewCount) ? (
                                         <span className="absolute right-4 bottom-4 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-900 dark:bg-neutral-900/95 dark:text-white shadow-sm">
                                             <Star
                                                 size={13}
@@ -222,6 +225,8 @@ export default function FeaturedStudios() {
                                             />
                                             {studio.rating.toFixed(1)}
                                         </span>
+                                    ) : (
+                                        <span className="absolute bottom-4 right-4 rounded-full bg-white/95 px-3 py-1.5 text-xs font-semibold text-neutral-600 dark:bg-neutral-900/95 dark:text-neutral-300">Not yet rated</span>
                                     )}
                                 </div>
 

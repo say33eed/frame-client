@@ -1,4 +1,7 @@
 "use client";
+import StudioReviews from "@/components/studios/StudioReviews";
+import { hasStudioRating } from "@/lib/studio-rating";
+
 
 import WishlistButton from "@/components/wishlist/WishlistButton";
 
@@ -213,10 +216,6 @@ export default function StudioDetailsPage() {
         ? studio.amenities
         : [];
 
-    const reviews = Array.isArray(studio.reviews)
-        ? studio.reviews
-        : [];
-
     const hostName =
         studio.host?.name ||
         studio.hostName ||
@@ -389,7 +388,7 @@ export default function StudioDetailsPage() {
                                     Client Rating
                                 </p>
                                 <p className="mt-1 flex items-center gap-1 font-semibold">
-                                    {typeof studio.rating === "number" ? (
+                                    {hasStudioRating(studio.rating, studio.reviewCount) ? (
                                         <>
                                             <Star
                                                 size={16}
@@ -467,57 +466,7 @@ export default function StudioDetailsPage() {
                             </div>
                         </section>
 
-                        <section className="rounded-2xl border border-neutral-200 bg-white p-6 sm:p-7">
-                            <h2 className="text-xl font-semibold">
-                                Creator Reviews{" "}
-                                {reviews.length > 0
-                                    ? `(${reviews.length})`
-                                    : ""}
-                            </h2>
-
-                            {reviews.length ? (
-                                <div className="mt-5 space-y-5">
-                                    {reviews.map((review, index) => (
-                                        <div
-                                            key={review._id || index}
-                                            className="border-t border-neutral-100 pt-4"
-                                        >
-                                            <div className="flex items-center justify-between gap-3">
-                                                <p className="font-semibold">
-                                                    {review.name ||
-                                                        review.userName ||
-                                                        "Frame creator"}
-                                                </p>
-
-                                                {typeof review.rating ===
-                                                    "number" && (
-                                                        <span className="inline-flex items-center gap-1 text-sm">
-                                                            <Star
-                                                                size={14}
-                                                                className="fill-[#E60023] text-[#E60023]"
-                                                            />
-                                                            {review.rating.toFixed(
-                                                                1
-                                                            )}
-                                                        </span>
-                                                    )}
-                                            </div>
-
-                                            <p className="mt-2 text-sm leading-6 text-neutral-600">
-                                                {review.comment ||
-                                                    review.text ||
-                                                    "No written review."}
-                                            </p>
-                                        </div>
-                                    ))}
-                                </div>
-                            ) : (
-                                <p className="mt-4 text-sm text-neutral-500">
-                                    No reviews yet. Reviews will appear when
-                                    creators share their experiences.
-                                </p>
-                            )}
-                        </section>
+                        <StudioReviews studioId={id} onChanged={() => void loadStudio()} />
                     </div>
 
                     <aside className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm lg:sticky lg:top-24">
@@ -531,7 +480,7 @@ export default function StudioDetailsPage() {
                                 </span>
                             </p>
 
-                            {typeof studio.rating === "number" && (
+                            {hasStudioRating(studio.rating, studio.reviewCount) && (
                                 <span className="inline-flex items-center gap-1 text-sm font-semibold">
                                     <Star
                                         size={15}
