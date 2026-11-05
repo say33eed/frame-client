@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { apiRequest } from "@/lib/api";
 
-type Review = { _id: string; userId: string; name?: string; rating: number; comment: string; createdAt?: string };
+type Review = { _id: string; userId: string; name?: string; rating: number; comment: string; createdAt?: string; usedStudio?: boolean };
 type ReviewsResponse = { reviews: Review[]; rating: number | null; reviewCount: number };
 type Eligibility = { eligible: boolean; myReview: Review | null };
 
@@ -108,7 +108,14 @@ export default function StudioReviews({ studioId, onChanged }: { studioId: strin
           {reviews.map((review) => (
             <div key={review._id} className="border-t border-neutral-200 pt-4 dark:border-white/10">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <p className="font-semibold">{review.name || "Frame creator"}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="font-semibold">{review.name || "Frame creator"}</p>
+                  {review.usedStudio && (
+                    <span className="inline-flex items-center rounded-full border border-[#E60023]/30 bg-[#F4CDD3] px-2.5 py-1 text-xs font-semibold text-[#8C0016] dark:border-red-400/30 dark:bg-[#49151C] dark:text-red-200">
+                      Used this studio
+                    </span>
+                  )}
+                </div>
                 <span className="inline-flex items-center gap-1 text-sm"><Star size={14} className="fill-[#E60023] text-[#E60023]" />{review.rating.toFixed(1)}</span>
               </div>
               <p className="mt-2 whitespace-pre-wrap break-words text-sm leading-6 text-neutral-600 dark:text-neutral-300">{review.comment}</p>
@@ -116,7 +123,7 @@ export default function StudioReviews({ studioId, onChanged }: { studioId: strin
             </div>
           ))}
         </div>
-      ) : <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">No reviews yet. Be the first eligible creator to share your experience.</p>}
+      ) : <p className="mt-4 text-sm text-neutral-500 dark:text-neutral-400">No reviews yet. Be the first to share your thoughts.</p>}
 
       {session?.user?.id && mine && !editing && (
         <div className="mt-6 flex flex-wrap gap-3 border-t border-neutral-200 pt-5 dark:border-white/10">
@@ -138,8 +145,8 @@ export default function StudioReviews({ studioId, onChanged }: { studioId: strin
           </div>
         </div>
       )}
-      {session?.user?.id && !eligible && !mine && <p className="mt-5 text-sm text-neutral-500 dark:text-neutral-400">Reviews become available after your confirmed studio booking has ended.</p>}
-      {!session?.user?.id && <p className="mt-5 text-sm text-neutral-500 dark:text-neutral-400">Sign in after completing a confirmed booking to leave a review.</p>}
+      {session?.user?.id && !eligible && !mine && <p className="mt-5 text-sm text-neutral-500 dark:text-neutral-400">Reviews are available to signed-in creators.</p>}
+      {!session?.user?.id && <p className="mt-5 text-sm text-neutral-500 dark:text-neutral-400">Sign in to leave a review. Reviews from creators who completed a confirmed booking receive a verified badge.</p>}
     </section>
   );
 }

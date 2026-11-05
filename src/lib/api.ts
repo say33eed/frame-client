@@ -118,7 +118,8 @@ export async function apiRequest<T>(
     const needsJwt = ["POST", "PUT", "PATCH", "DELETE"].includes(method) &&
         (path === "/api/studios" || path.startsWith("/api/studios/") ||
          path === "/api/bookings" || path.startsWith("/api/bookings/") ||
-         path.startsWith("/api/wishlist/"));
+         path.startsWith("/api/wishlist/") ||
+         path.startsWith("/api/reviews/"));
 
     if (needsJwt) {
         // Issuing a short-lived security cookie is safe to retry on transient
