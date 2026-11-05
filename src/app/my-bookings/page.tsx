@@ -2,6 +2,7 @@
 "use client";
 
 import FrameLoading from "@/components/FrameLoading";
+import { bookingCompleted } from "@/lib/booking-time";
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -596,7 +597,7 @@ export default function MyBookingsPage() {
                                         <div className="min-w-0 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <StatusBadge
-                                                    status={booking.status}
+                                                    status={bookingCompleted(booking) ? "Completed" : booking.status}
                                                 />
 
                                                 <span className="text-xs text-neutral-400">
@@ -676,7 +677,7 @@ export default function MyBookingsPage() {
                                                 </p>
                                             </div>
 
-                                            {booking.status === "Confirmed" && (
+                                            {(booking.status === "Confirmed" || booking.status === "Completed") && (
                                                 <button
                                                     type="button"
                                                     disabled={downloadingId !== null}
@@ -690,6 +691,15 @@ export default function MyBookingsPage() {
                                                     )}
                                                     {downloadingId === booking._id ? "Preparing PDF..." : "Download Invoice"}
                                                 </button>
+                                            )}
+
+                                            {bookingCompleted(booking) && (
+                                                <Link
+                                                    href={`/studios/${booking.studioId}#creator-reviews`}
+                                                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-[#E60023] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#C9001F]"
+                                                >
+                                                    Write or manage review
+                                                </Link>
                                             )}
 
                                             {booking.status === "Pending" && (

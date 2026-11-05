@@ -1,6 +1,7 @@
 
 "use client";
 
+import { bookingInstant, bangladeshToday } from "@/lib/booking-time";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -34,16 +35,6 @@ const money = (value: number) =>
         minimumFractionDigits: 0,
         maximumFractionDigits: 2,
     })}`;
-
-function localToday() {
-    const now = new Date();
-
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const day = String(now.getDate()).padStart(2, "0");
-
-    return `${year}-${month}-${day}`;
-}
 
 function timeMinutes(value: string) {
     if (!/^\d{2}:\d{2}$/.test(value)) return 0;
@@ -154,10 +145,8 @@ export default function BookingModal({
             return;
         }
 
-        // Matches the current backend UTC validation.
-        const requestedStart = new Date(
-            `${date}T${startTime}:00Z`
-        );
+        // Match the backend: booking times are Bangladesh local time (UTC+06).
+        const requestedStart = new Date(bookingInstant(date, startTime));
 
         if (requestedStart.getTime() <= Date.now()) {
             toast.error(
@@ -301,7 +290,7 @@ export default function BookingModal({
                         <input
                             type="date"
                             required
-                            min={localToday()}
+                            min={bangladeshToday()}
                             value={date}
                             onChange={(event) =>
                                 setDate(event.target.value)

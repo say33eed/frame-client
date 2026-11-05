@@ -95,7 +95,7 @@ export default function StudioReviews({ studioId, onChanged }: { studioId: strin
   }
 
   return (
-    <section className="rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-950 sm:p-7 dark:border-white/15 dark:bg-[#242426] dark:text-white">
+    <section id="creator-reviews" className="scroll-mt-28 rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-950 sm:p-7 dark:border-white/15 dark:bg-[#242426] dark:text-white">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 className="text-xl font-semibold">Creator Reviews ({count})</h2>
         <span className="text-sm font-semibold text-neutral-600 dark:text-neutral-300">

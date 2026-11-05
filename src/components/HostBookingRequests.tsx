@@ -1,5 +1,7 @@
 "use client";
 
+import { bookingCompleted } from "@/lib/booking-time";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Check, Clock3, LoaderCircle, RefreshCw, X, AlertTriangle } from "lucide-react";
 import { apiRequest } from "@/lib/api";
@@ -169,7 +171,7 @@ export default function HostBookingRequests({ userId }: { userId: string }) {
             {!loading && processed.length > 0 && <div className="mt-5 border-t border-neutral-200 pt-4 dark:border-white/10">
                 <h3 className="flex items-center gap-2 text-sm font-semibold"><Clock3 size={16}/> Recent decisions</h3>
                 <div className="mt-3 space-y-2">{processed.map(booking => <div key={booking._id} className="flex flex-wrap justify-between gap-2 text-sm text-neutral-600 dark:text-neutral-300">
-                    <span>{booking.studioTitle || "Studio"} · {displayDate(booking.date)}</span><span className="font-semibold">{booking.status}</span>
+                    <span>{booking.studioTitle || "Studio"} · {displayDate(booking.date)}</span><span className="font-semibold">{bookingCompleted(booking) ? "Completed" : booking.status}</span>
                 </div>)}</div>
             </div>}
             {confirmation && (
