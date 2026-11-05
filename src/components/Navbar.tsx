@@ -1,5 +1,6 @@
-
 "use client";
+
+import { waitForFrameServer } from "@/lib/api";
 
 import Image from "next/image";
 import Link from "next/link";
@@ -126,6 +127,10 @@ function AccountMenu({
         setSignOutError("");
 
         try {
+            if (!(await waitForFrameServer())) {
+                showSignOutError("Frame services are still starting. Please try again shortly.");
+                return;
+            }
             const result = await authClient.signOut();
 
             if (result.error) {

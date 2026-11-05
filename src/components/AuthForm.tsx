@@ -17,6 +17,7 @@ import {
     AlertCircle,
     LoaderCircle,
 } from "lucide-react";
+import { waitForFrameServer } from "@/lib/api";
 import {
     authClient,
     googleAuthEnabled,
@@ -148,6 +149,10 @@ export default function AuthForm({ mode }: AuthFormProps) {
         setLoading(true);
 
         try {
+            if (!(await waitForFrameServer())) {
+                showAuthError("Frame services are still starting. Please try again shortly.");
+                return;
+            }
             if (isRegister) {
                 const result = await authClient.signUp.email({
                     name: name.trim(),
@@ -215,6 +220,11 @@ export default function AuthForm({ mode }: AuthFormProps) {
         setLoading(true);
 
         try {
+            if (!(await waitForFrameServer())) {
+                showAuthError("Frame services are still starting. Please try again shortly.");
+                setLoading(false);
+                return;
+            }
             const result = await authClient.signIn.social({
                 provider: "google",
 

@@ -36,7 +36,7 @@ function reportConnection(phase: ConnectionPhase) {
     }
 }
 
-async function waitUntilReady(): Promise<boolean> {
+export async function waitForFrameServer(): Promise<boolean> {
     if (Date.now() < readyUntil) return true;
     if (readinessFlight) return readinessFlight;
 
@@ -97,7 +97,7 @@ export async function apiRequest<T>(
     // Never automatically repeat writes.
     const maxRetries =
         method === "GET"
-            ? Math.min(Math.max(retries, 0), 2)
+            ? Math.min(Math.max(retries === 0 ? 2 : retries, 0), 3)
             : 0;
 
     const url = `${API_URL}${path.startsWith("/") ? path : `/${path}`
@@ -105,7 +105,7 @@ export async function apiRequest<T>(
 
     // Check availability before issuing JWTs or performing any write.
     // The health request itself must not recurse into this guard.
-    if (path !== "/api/health" && !(await waitUntilReady())) {
+    if (path !== "/api/health" && !(await waitForFrameServer())) {
         return {
             success: false,
             message: "Frame services are still starting. Please try again in a moment.",
@@ -153,7 +153,7 @@ export async function apiRequest<T>(
             readyUntil = 0;
             reportConnection("waking");
             // Recheck actual database readiness before another JWT attempt.
-            if (!(await waitUntilReady())) {
+            if (!(await waitForFrameServer())) {
                 return {
                     success: false,
                     message: "Frame services are still unavailable. Please try again later.",
@@ -166,6 +166,9 @@ export async function apiRequest<T>(
 
     for (let attempt = 0; attempt <= maxRetries; attempt++) {
         try {
+            if (requestOptions.signal?.aborted) {
+                return { success: false, message: "Request cancelled.", status: 499 };
+            }
             const response = await fetch(url, {
                 ...requestOptions,
                 credentials: "include",
@@ -197,6 +200,9 @@ export async function apiRequest<T>(
                     response.status >= 500 &&
                     attempt < maxRetries
                 ) {
+                    // A gateway may briefly fail after health becomes ready.
+                    readyUntil = 0;
+                    if (!(await waitForFrameServer())) break;
                     await wait(600 * (attempt + 1));
                     continue;
                 }
@@ -223,6 +229,7 @@ export async function apiRequest<T>(
             }
 
             if (attempt < maxRetries) {
+                if (!(await waitForFrameServer())) break;
                 await wait(600 * (attempt + 1));
                 continue;
             }
@@ -275,7 +282,7 @@ export async function downloadBookingInvoice(bookingId: string): Promise<ApiResu
         return { success: false, message: "Invalid booking reference.", status: 400 };
     }
     try {
-        if (!(await waitUntilReady())) {
+        if (!(await waitForFrameServer())) {
             return { success: false, message: "Frame services are still starting. Please try again.", status: 503 };
         }
         const response = await fetch(

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
+import { apiRequest } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
 import { ArrowRight, Camera, Check, CameraIcon, Mail, ShieldCheck, Sparkles, Video } from "lucide-react";
@@ -43,14 +44,13 @@ export default function Footer() {
     setBusy(true);
     setMessage("");
     try {
-      const api = ((process.env.NODE_ENV === "production" ? "https://frame-client.vercel.app" : (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"))).replace(/\/+$/, "");
-      const response = await fetch(`${api}/api/newsletter`, {
+      const result = await apiRequest<{ message?: string }>("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email: email.trim() }),
       });
-      const data = await response.json().catch(() => null);
-      if (!response.ok) throw new Error(data?.message || "Unable to subscribe right now.");
+      if (!result.success) throw new Error(result.message);
+      const data = result.data;
       setSubscribed(true);
       setEmail("");
       setMessage(data?.message || "You're on the list!");
