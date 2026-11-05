@@ -13,10 +13,10 @@ import {
     Camera,
     CheckCircle2,
     Clock3,
+    Download,
     LoaderCircle,
     MapPin,
     RefreshCw,
-    Download,
     X,
     XCircle,
 } from "lucide-react";
@@ -67,6 +67,27 @@ const money = (value: number | undefined) =>
     `$${Number(value ?? 0).toLocaleString("en-US", {
         maximumFractionDigits: 2,
     })}`;
+
+// Shared Frame booking action styles.
+// Explicit important dark hover classes prevent theme overrides.
+const bookingActionBase =
+    "inline-flex min-h-10 w-full cursor-pointer items-center justify-center gap-2 rounded-full border px-4 py-2 text-center text-xs font-semibold transition-all duration-200 ease-out focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto";
+
+const bookingActionOutline =
+    `${bookingActionBase} ` +
+    "border-neutral-200 bg-white text-neutral-900 " +
+    "hover:!border-[#E60023] hover:!bg-[#F4CDD3] hover:!text-[#E60023] " +
+    "focus-visible:!border-[#E60023] " +
+    "dark:!border-white/20 dark:!bg-[#242426] dark:!text-white " +
+    "dark:hover:!border-[#E60023] dark:hover:!bg-[#49151C] dark:hover:!text-[#FF6B7A]";
+
+const bookingActionPrimary =
+    `${bookingActionBase} ` +
+    "border-[#E60023] bg-[#E60023] text-white " +
+    "hover:!border-[#C9001F] hover:!bg-[#C9001F] hover:!text-white " +
+    "focus-visible:!border-[#C9001F] " +
+    "dark:!border-[#E60023] dark:!bg-[#E60023] dark:!text-white " +
+    "dark:hover:!border-[#C9001F] dark:hover:!bg-[#C9001F] dark:hover:!text-white";
 
 function formatDate(date: string) {
     const [year, month, day] = date.split("-").map(Number);
@@ -207,7 +228,10 @@ function CancellationModal({
         <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-neutral-950/65 px-4 py-6 backdrop-blur-[3px]"
             onMouseDown={(event) => {
-                if (event.target === event.currentTarget && !cancelling) {
+                if (
+                    event.target === event.currentTarget &&
+                    !cancelling
+                ) {
                     onClose();
                 }
             }}
@@ -244,7 +268,7 @@ function CancellationModal({
                         onClick={onClose}
                         disabled={cancelling}
                         aria-label="Close cancellation dialog"
-                        className="rounded-full p-1 text-neutral-500 hover:bg-neutral-100 disabled:opacity-50"
+                        className="cursor-pointer rounded-full p-1 text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-[#E60023] disabled:cursor-not-allowed disabled:opacity-50"
                     >
                         <X size={19} />
                     </button>
@@ -280,7 +304,7 @@ function CancellationModal({
                         type="button"
                         onClick={onClose}
                         disabled={cancelling}
-                        className="min-h-11 rounded-full border border-neutral-200 bg-white px-5 text-sm font-semibold text-neutral-900 transition-colors hover:bg-neutral-50 disabled:opacity-50"
+                        className={bookingActionOutline}
                     >
                         Keep Booking
                     </button>
@@ -289,7 +313,7 @@ function CancellationModal({
                         type="button"
                         onClick={onConfirm}
                         disabled={cancelling}
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#E60023] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F] disabled:cursor-not-allowed disabled:opacity-60"
+                        className={bookingActionPrimary}
                     >
                         {cancelling ? (
                             <>
@@ -311,6 +335,7 @@ function CancellationModal({
 
 export default function MyBookingsPage() {
     const router = useRouter();
+
     const { data: session, isPending: sessionLoading } =
         authClient.useSession();
 
@@ -319,9 +344,11 @@ export default function MyBookingsPage() {
     const [bookings, setBookings] = useState<Booking[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-    const [cancelTarget, setCancelTarget] = useState<Booking | null>(null);
+    const [cancelTarget, setCancelTarget] =
+        useState<Booking | null>(null);
     const [cancelling, setCancelling] = useState(false);
-    const [downloadingId, setDownloadingId] = useState<string | null>(null);
+    const [downloadingId, setDownloadingId] =
+        useState<string | null>(null);
 
     const cancellingRef = useRef(false);
 
@@ -341,7 +368,9 @@ export default function MyBookingsPage() {
 
         if (!result.success) {
             if (result.status === 401) {
-                router.replace("/login?redirect=%2Fmy-bookings");
+                router.replace(
+                    "/login?redirect=%2Fmy-bookings"
+                );
                 return;
             }
 
@@ -364,7 +393,9 @@ export default function MyBookingsPage() {
         if (sessionLoading) return;
 
         if (!userId) {
-            router.replace("/login?redirect=%2Fmy-bookings");
+            router.replace(
+                "/login?redirect=%2Fmy-bookings"
+            );
             return;
         }
 
@@ -391,7 +422,9 @@ export default function MyBookingsPage() {
         if (!cancelTarget || cancellingRef.current) return;
 
         if (cancelTarget.status !== "Pending") {
-            toast.error("Only pending bookings can be cancelled.");
+            toast.error(
+                "Only pending bookings can be cancelled."
+            );
             setCancelTarget(null);
             return;
         }
@@ -403,7 +436,9 @@ export default function MyBookingsPage() {
 
         try {
             const result = await apiRequest<CancelResponse>(
-                `/api/bookings/${encodeURIComponent(targetId)}/cancel`,
+                `/api/bookings/${encodeURIComponent(
+                    targetId
+                )}/cancel`,
                 {
                     method: "PATCH",
                     timeoutMs: 15000,
@@ -413,7 +448,9 @@ export default function MyBookingsPage() {
             if (!result.success) {
                 if (result.status === 401) {
                     toast.error("Please sign in again.");
-                    router.replace("/login?redirect=%2Fmy-bookings");
+                    router.replace(
+                        "/login?redirect=%2Fmy-bookings"
+                    );
                     return;
                 }
 
@@ -441,7 +478,9 @@ export default function MyBookingsPage() {
             );
 
             setCancelTarget(null);
-            toast.success("Booking cancelled successfully.");
+            toast.success(
+                "Booking cancelled successfully."
+            );
         } catch {
             toast.error(
                 "Unable to cancel your booking. Please try again."
@@ -452,17 +491,28 @@ export default function MyBookingsPage() {
         }
     }
 
-    async function handleDownloadInvoice(bookingId: string) {
+    async function handleDownloadInvoice(
+        bookingId: string
+    ) {
         if (downloadingId) return;
+
         setDownloadingId(bookingId);
+
         try {
-            const result = await downloadBookingInvoice(bookingId);
+            const result =
+                await downloadBookingInvoice(bookingId);
+
             if (result.success) {
-                toast.success("Invoice downloaded successfully.");
+                toast.success(
+                    "Invoice downloaded successfully."
+                );
             } else {
                 toast.error(result.message);
+
                 if (result.status === 401) {
-                    router.replace("/login?redirect=%2Fmy-bookings");
+                    router.replace(
+                        "/login?redirect=%2Fmy-bookings"
+                    );
                 }
             }
         } finally {
@@ -471,7 +521,12 @@ export default function MyBookingsPage() {
     }
 
     if (sessionLoading || !userId || loading) {
-        return <FrameLoading variant="dashboard" title="my bookings" />;
+        return (
+            <FrameLoading
+                variant="dashboard"
+                title="my bookings"
+            />
+        );
     }
 
     return (
@@ -489,14 +544,14 @@ export default function MyBookingsPage() {
                         </h1>
 
                         <p className="mt-3 text-sm leading-6 text-neutral-500">
-                            Track your studio reservations, shoot times,
-                            and booking statuses.
+                            Track your studio reservations, shoot
+                            times, and booking statuses.
                         </p>
                     </div>
 
                     <Link
                         href="/studios"
-                        className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[#E60023] px-5 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F]"
+                        className="inline-flex min-h-11 cursor-pointer items-center justify-center gap-2 rounded-full bg-[#E60023] px-5 text-sm font-semibold text-white transition-colors duration-200 hover:bg-[#C9001F]"
                     >
                         Explore More Studios
                         <ArrowRight size={16} />
@@ -520,8 +575,10 @@ export default function MyBookingsPage() {
 
                         <button
                             type="button"
-                            onClick={() => void loadBookings()}
-                            className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#E60023] px-6 text-sm font-semibold text-white hover:bg-[#C9001F]"
+                            onClick={() =>
+                                void loadBookings()
+                            }
+                            className="mt-6 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-[#E60023] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F]"
                         >
                             <RefreshCw size={16} />
                             Try Again
@@ -538,14 +595,14 @@ export default function MyBookingsPage() {
                         </h2>
 
                         <p className="mx-auto mt-3 max-w-md text-sm leading-7 text-neutral-500">
-                            Your studio reservations will appear here.
-                            Explore creative spaces and book your first
-                            workspace.
+                            Your studio reservations will
+                            appear here. Explore creative
+                            spaces and book your first workspace.
                         </p>
 
                         <Link
                             href="/studios"
-                            className="mt-7 inline-flex min-h-11 items-center gap-2 rounded-full bg-[#E60023] px-6 text-sm font-semibold text-white hover:bg-[#C9001F]"
+                            className="mt-7 inline-flex min-h-11 cursor-pointer items-center gap-2 rounded-full bg-[#E60023] px-6 text-sm font-semibold text-white transition-colors hover:bg-[#C9001F]"
                         >
                             Explore Studios
                             <ArrowRight size={16} />
@@ -563,8 +620,10 @@ export default function MyBookingsPage() {
 
                             <button
                                 type="button"
-                                onClick={() => void loadBookings()}
-                                className="inline-flex items-center gap-2 text-sm font-medium text-neutral-500 transition-colors hover:text-[#E60023]"
+                                onClick={() =>
+                                    void loadBookings()
+                                }
+                                className="inline-flex cursor-pointer items-center gap-2 text-sm font-medium text-neutral-500 transition-colors hover:text-[#E60023]"
                             >
                                 <RefreshCw size={15} />
                                 Refresh
@@ -586,7 +645,9 @@ export default function MyBookingsPage() {
                                                 }`}
                                         >
                                             <BookingImage
-                                                src={booking.studioImage}
+                                                src={
+                                                    booking.studioImage
+                                                }
                                                 title={
                                                     booking.studioTitle ||
                                                     "Studio"
@@ -597,12 +658,20 @@ export default function MyBookingsPage() {
                                         <div className="min-w-0 flex-1">
                                             <div className="flex flex-wrap items-center gap-2">
                                                 <StatusBadge
-                                                    status={bookingCompleted(booking) ? "Completed" : booking.status}
+                                                    status={
+                                                        bookingCompleted(
+                                                            booking
+                                                        )
+                                                            ? "Completed"
+                                                            : booking.status
+                                                    }
                                                 />
 
                                                 <span className="text-xs text-neutral-400">
                                                     ID: #
-                                                    {booking._id.slice(-7)}
+                                                    {booking._id.slice(
+                                                        -7
+                                                    )}
                                                 </span>
                                             </div>
 
@@ -636,21 +705,23 @@ export default function MyBookingsPage() {
                                                     {" – "}
                                                     {formatTime(
                                                         booking.endTime
-                                                    )}
-                                                    {" "}
+                                                    )}{" "}
                                                     (
                                                     {calculateHours(
                                                         booking
-                                                    )}
-                                                    {" "}
+                                                    )}{" "}
                                                     hrs)
                                                 </span>
                                             </div>
 
                                             {booking.studioLocation && (
                                                 <p className="mt-2 inline-flex items-center gap-1.5 text-xs text-neutral-400">
-                                                    <MapPin size={13} />
-                                                    {booking.studioLocation}
+                                                    <MapPin
+                                                        size={13}
+                                                    />
+                                                    {
+                                                        booking.studioLocation
+                                                    }
                                                 </p>
                                             )}
 
@@ -658,65 +729,108 @@ export default function MyBookingsPage() {
                                                 "number" && (
                                                     <p className="mt-2 text-xs text-neutral-500">
                                                         Crew:{" "}
-                                                        {booking.crewCount}{" "}
-                                                        {booking.crewCount === 1
+                                                        {
+                                                            booking.crewCount
+                                                        }{" "}
+                                                        {booking.crewCount ===
+                                                            1
                                                             ? "person"
                                                             : "people"}
                                                     </p>
                                                 )}
                                         </div>
 
-                                        {/* Price and actions: no desktop vertical divider */}
-                                        <div className="flex shrink-0 flex-col justify-between gap-5 border-t border-neutral-100 pt-4 md:min-w-40 md:items-end md:border-t-0 md:py-0 md:pl-5">
+                                        {/* Price and actions — no vertical divider */}
+                                        <div className="flex shrink-0 flex-col justify-between gap-3 border-t border-neutral-100 pt-4 md:min-w-40 md:items-end md:border-t-0 md:py-0 md:pl-5">
                                             <div className="md:text-right">
                                                 <p className="text-xs text-neutral-400">
                                                     Estimated total
                                                 </p>
 
                                                 <p className="mt-1 text-2xl font-bold text-[#E60023]">
-                                                    {money(booking.total)}
+                                                    {money(
+                                                        booking.total
+                                                    )}
                                                 </p>
                                             </div>
 
-                                            {(booking.status === "Confirmed" || booking.status === "Completed") && (
-                                                <button
-                                                    type="button"
-                                                    disabled={downloadingId !== null}
-                                                    onClick={() => void handleDownloadInvoice(booking._id)}
-                                                    className="inline-flex min-h-10 cursor-pointer items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-4 text-xs font-semibold text-neutral-900 transition-colors duration-200 hover:border-[#E60023] hover:bg-[#F4CDD3] hover:text-[#E60023] focus-visible:border-[#E60023] focus-visible:outline-none disabled:cursor-wait disabled:opacity-60 dark:border-white/20 dark:bg-[#242426] dark:text-white dark:hover:border-[#E60023] dark:hover:bg-[#49151C] dark:hover:text-[#FF6B7A]"
-                                                >
-                                                    {downloadingId === booking._id ? (
-                                                        <LoaderCircle size={15} className="animate-spin" />
-                                                    ) : (
-                                                        <Download size={15} />
+                                            <div className="flex w-full flex-col gap-2.5 md:w-auto md:items-end">
+                                                {(booking.status ===
+                                                    "Confirmed" ||
+                                                    booking.status ===
+                                                    "Completed") && (
+                                                        <button
+                                                            type="button"
+                                                            disabled={
+                                                                downloadingId !==
+                                                                null
+                                                            }
+                                                            onClick={() =>
+                                                                void handleDownloadInvoice(
+                                                                    booking._id
+                                                                )
+                                                            }
+                                                            className={
+                                                                bookingActionOutline
+                                                            }
+                                                        >
+                                                            {downloadingId ===
+                                                                booking._id ? (
+                                                                <LoaderCircle
+                                                                    size={
+                                                                        15
+                                                                    }
+                                                                    className="animate-spin"
+                                                                />
+                                                            ) : (
+                                                                <Download
+                                                                    size={
+                                                                        15
+                                                                    }
+                                                                />
+                                                            )}
+
+                                                            {downloadingId ===
+                                                                booking._id
+                                                                ? "Preparing PDF..."
+                                                                : "Download Invoice"}
+                                                        </button>
                                                     )}
-                                                    {downloadingId === booking._id ? "Preparing PDF..." : "Download Invoice"}
-                                                </button>
-                                            )}
 
-                                            {bookingCompleted(booking) && (
-                                                <Link
-                                                    href={`/studios/${booking.studioId}#creator-reviews`}
-                                                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full bg-[#E60023] px-4 text-xs font-semibold text-white transition-colors hover:bg-[#C9001F]"
-                                                >
-                                                    Write or manage review
-                                                </Link>
-                                            )}
+                                                {bookingCompleted(
+                                                    booking
+                                                ) && (
+                                                        <Link
+                                                            href={`/studios/${booking.studioId}#creator-reviews`}
+                                                            className={
+                                                                bookingActionPrimary
+                                                            }
+                                                        >
+                                                            Write or manage
+                                                            review
+                                                        </Link>
+                                                    )}
 
-                                            {booking.status === "Pending" && (
-                                                <button
-                                                    type="button"
-                                                    onClick={() =>
-                                                        setCancelTarget(
-                                                            booking
-                                                        )
-                                                    }
-                                                    className="inline-flex min-h-10 items-center justify-center gap-2 rounded-full border border-red-200 bg-red-50 px-4 text-xs font-semibold text-[#E60023] transition-colors hover:border-[#E60023] hover:bg-red-100"
-                                                >
-                                                    <XCircle size={15} />
-                                                    Cancel Booking
-                                                </button>
-                                            )}
+                                                {booking.status ===
+                                                    "Pending" && (
+                                                        <button
+                                                            type="button"
+                                                            onClick={() =>
+                                                                setCancelTarget(
+                                                                    booking
+                                                                )
+                                                            }
+                                                            className={
+                                                                bookingActionOutline
+                                                            }
+                                                        >
+                                                            <XCircle
+                                                                size={15}
+                                                            />
+                                                            Cancel Booking
+                                                        </button>
+                                                    )}
+                                            </div>
                                         </div>
                                     </div>
                                 </article>
@@ -731,7 +845,9 @@ export default function MyBookingsPage() {
                     booking={cancelTarget}
                     cancelling={cancelling}
                     onClose={closeCancellation}
-                    onConfirm={() => void confirmCancellation()}
+                    onConfirm={() =>
+                        void confirmCancellation()
+                    }
                 />
             )}
         </main>
