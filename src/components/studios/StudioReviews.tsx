@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { apiRequest } from "@/lib/api";
 
-type Review = { _id: string; userId: string; name?: string; rating: number; comment: string; createdAt?: string; usedStudio?: boolean };
+type Review = { _id: string; userId: string; name?: string; image?: string | null; rating: number; comment: string; createdAt?: string; usedStudio?: boolean };
 type ReviewsResponse = { reviews: Review[]; rating: number | null; reviewCount: number };
 type Eligibility = { eligible: boolean; myReview: Review | null };
 
@@ -109,7 +109,17 @@ export default function StudioReviews({ studioId, onChanged }: { studioId: strin
             <div key={review._id} className="border-t border-neutral-200 pt-4 dark:border-white/10">
               <div className="flex flex-wrap items-center justify-between gap-2">
                 <div className="flex flex-wrap items-center gap-2">
-                  <p className="font-semibold">{review.name || "Frame creator"}</p>
+                  <div className="flex min-w-0 items-center gap-3">
+                    <div className="flex size-10 shrink-0 items-center justify-center overflow-hidden rounded-full bg-[#F4CDD3] text-sm font-semibold text-[#B8001C] dark:bg-[#49151C] dark:text-white">
+                      {review.image ? (
+                        // External provider profile images use the same source as the navbar avatar.
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={review.image} alt={`${review.name || "Creator"}'s profile photo`} className="h-full w-full object-cover" referrerPolicy="no-referrer" onError={(event) => { event.currentTarget.style.display = "none"; const fallback = event.currentTarget.nextElementSibling as HTMLElement | null; if (fallback) fallback.hidden = false; }} />
+                      ) : null}
+                      <span hidden={Boolean(review.image)}>{(review.name || "F").charAt(0).toUpperCase()}</span>
+                    </div>
+                    <p className="min-w-0 truncate font-semibold">{review.name || "Frame creator"}</p>
+                  </div>
                   {review.usedStudio && (
                     <span className="inline-flex items-center rounded-full border border-[#E60023]/30 bg-[#F4CDD3] px-2.5 py-1 text-xs font-semibold text-[#8C0016] dark:border-red-400/30 dark:bg-[#49151C] dark:text-red-200">
                       Used this studio
@@ -127,8 +137,8 @@ export default function StudioReviews({ studioId, onChanged }: { studioId: strin
 
       {session?.user?.id && mine && !editing && (
         <div className="mt-6 flex flex-wrap gap-3 border-t border-neutral-200 pt-5 dark:border-white/10">
-          <button type="button" onClick={startEdit} className="inline-flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold hover:border-[#E60023] dark:border-white/20"><Pencil size={15} />Edit my review</button>
-          <button type="button" disabled={busy} onClick={() => void remove()} className="inline-flex items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold hover:border-[#E60023] disabled:opacity-50 dark:border-white/20"><Trash2 size={15} />Delete</button>
+          <button type="button" onClick={startEdit} className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold transition-colors duration-200 hover:border-[#E60023] hover:bg-[#F4CDD3] hover:text-[#B8001C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023] dark:border-white/20 dark:hover:border-[#E60023] dark:hover:bg-[#49151C] dark:hover:text-white"><Pencil size={15} />Edit my review</button>
+          <button type="button" disabled={busy} onClick={() => void remove()} className="inline-flex cursor-pointer items-center gap-2 rounded-full border border-neutral-300 px-4 py-2 text-sm font-semibold transition-colors duration-200 hover:border-[#E60023] hover:bg-[#F4CDD3] hover:text-[#B8001C] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023] disabled:cursor-not-allowed disabled:opacity-50 dark:border-white/20 dark:hover:border-[#E60023] dark:hover:bg-[#49151C] dark:hover:text-white"><Trash2 size={15} />Delete</button>
         </div>
       )}
       {session?.user?.id && eligible && (!mine || editing) && (

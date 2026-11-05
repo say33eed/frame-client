@@ -52,11 +52,14 @@ type Studio = {
         comment?: string;
         text?: string;
     }>;
+    hostImage?: string;
+    hostPhoto?: string;
     hostName?: string;
     hostEmail?: string;
     userName?: string;
     userEmail?: string;
     host?: {
+        image?: string;
         name?: string;
         email?: string;
     };
@@ -222,6 +225,12 @@ export default function StudioDetailsPage() {
         studio.userName ||
         "Host information unavailable";
 
+    const hostImage =
+        studio.host?.image ||
+        studio.hostImage ||
+        studio.hostPhoto ||
+        "";
+
     const hostEmail =
         studio.host?.email ||
         studio.hostEmail ||
@@ -262,27 +271,10 @@ export default function StudioDetailsPage() {
                         </h1>
                     </div>
 
-                    <WishlistButton studioId={studio._id} />
-
-                    <button
-                        type="button"
-                        onClick={() => {
-                            if (
-                                typeof navigator !== "undefined" &&
-                                navigator.clipboard
-                            ) {
-                                void navigator.clipboard.writeText(
-                                    window.location.href
-                                );
-                            }
-                        }}
-                        className="rounded-full border border-neutral-200 bg-white px-5 py-2.5 text-sm font-semibold transition-colors hover:border-[#E60023] hover:text-[#E60023]"
-                    >
-                        Copy page link
-                    </button>
                 </div>
 
                 <div className="relative overflow-hidden rounded-3xl bg-neutral-200">
+                    <WishlistButton studioId={studio._id} className="absolute right-4 top-4 z-20 cursor-pointer sm:right-5 sm:top-5" />
                     <StudioImage
                         src={images[imageIndex]}
                         alt={`${titleOf(studio)} photo ${imageIndex + 1}`}
@@ -448,8 +440,23 @@ export default function StudioDetailsPage() {
                             </h2>
 
                             <div className="mt-5 flex items-center gap-4">
-                                <div className="grid size-12 shrink-0 place-items-center rounded-full bg-neutral-100 text-lg font-semibold text-neutral-700">
-                                    {hostName.charAt(0).toUpperCase()}
+                                <div className="grid size-12 shrink-0 place-items-center overflow-hidden rounded-full bg-neutral-100 text-lg font-semibold text-neutral-700">
+                                    {hostImage ? (
+                                        // Host images may be hosted by external authentication providers.
+                                        // eslint-disable-next-line @next/next/no-img-element
+                                        <img
+                                            src={hostImage}
+                                            alt={`${hostName}'s profile photo`}
+                                            className="h-full w-full object-cover"
+                                            referrerPolicy="no-referrer"
+                                            onError={(event) => {
+                                                event.currentTarget.style.display = "none";
+                                                const fallback = event.currentTarget.nextElementSibling as HTMLElement | null;
+                                                if (fallback) fallback.hidden = false;
+                                            }}
+                                        />
+                                    ) : null}
+                                    <span hidden={Boolean(hostImage)}>{hostName.charAt(0).toUpperCase()}</span>
                                 </div>
 
                                 <div>
