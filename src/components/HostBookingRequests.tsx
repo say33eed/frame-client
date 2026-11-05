@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Check, Clock3, LoaderCircle, RefreshCw, X } from "lucide-react";
+import { Check, Clock3, LoaderCircle, RefreshCw, X, AlertTriangle } from "lucide-react";
 import { apiRequest } from "@/lib/api";
 
 type HostBooking = {
@@ -31,6 +31,9 @@ export default function HostBookingRequests({ userId }: { userId: string }) {
     const [bookings, setBookings] = useState<HostBooking[]>([]);
     const [loading, setLoading] = useState(true);
     const [busyId, setBusyId] = useState<string | null>(null);
+    const [confirmation, setConfirmation] = useState<{ booking: HostBooking; decision: "confirm" | "cancel" } | null>(null);
+    const modalCancelRef = useRef<HTMLButtonElement>(null);
+    const previousFocusRef = useRef<HTMLElement | null>(null);
     const [error, setError] = useState("");
     const [notice, setNotice] = useState("");
     const [actionError, setActionError] = useState("");
@@ -56,10 +59,50 @@ export default function HostBookingRequests({ userId }: { userId: string }) {
         return () => window.clearTimeout(id);
     }, [load, userId]);
 
-    const decide = async (booking: HostBooking, decision: "confirm" | "cancel") => {
-        if (inFlight.current || booking.status !== "Pending") return;
-        const verb = decision === "confirm" ? "confirm" : "decline";
-        if (!window.confirm(`Are you sure you want to ${verb} the booking for ${booking.studioTitle || "this studio"} on ${displayDate(booking.date)}?`)) return;
+    const askDecision = (booking: HostBooking, decision: "confirm" | "cancel") => {
+        if (inFlight.current || busyId !== null || loading || booking.status !== "Pending") return;
+        previousFocusRef.current = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+        setConfirmation({ booking, decision });
+    };
+
+    const closeConfirmation = () => {
+        if (inFlight.current) return;
+        setConfirmation(null);
+        window.setTimeout(() => previousFocusRef.current?.focus(), 0);
+    };
+
+    useEffect(() => {
+        if (!confirmation) return;
+        const oldOverflow = document.body.style.overflow;
+        document.body.style.overflow = "hidden";
+        modalCancelRef.current?.focus();
+        const onKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Escape" && !inFlight.current) {
+                event.preventDefault();
+                setConfirmation(null);
+                window.setTimeout(() => previousFocusRef.current?.focus(), 0);
+            }
+            if (event.key === "Tab") {
+                const dialog = document.getElementById("frame-host-decision-dialog");
+                if (!dialog) return;
+                const focusables = Array.from(dialog.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
+                if (!focusables.length) { event.preventDefault(); return; }
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
+                else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
+            }
+        };
+        document.addEventListener("keydown", onKeyDown);
+        return () => {
+            document.body.style.overflow = oldOverflow;
+            document.removeEventListener("keydown", onKeyDown);
+        };
+    }, [confirmation]);
+
+    const decide = async () => {
+        if (!confirmation || inFlight.current || confirmation.booking.status !== "Pending") return;
+        const { booking, decision } = confirmation;
         inFlight.current = true;
         setBusyId(booking._id);
         setError("");
@@ -79,6 +122,8 @@ export default function HostBookingRequests({ userId }: { userId: string }) {
         await load();
         setBusyId(null);
         inFlight.current = false;
+        setConfirmation(null);
+        window.setTimeout(() => previousFocusRef.current?.focus(), 0);
     };
 
     const pending = bookings.filter(booking => booking.status === "Pending");
@@ -110,11 +155,11 @@ export default function HostBookingRequests({ userId }: { userId: string }) {
                         {booking.notes && <p className="max-w-2xl whitespace-pre-wrap break-words text-sm text-neutral-500 dark:text-neutral-400">Notes: {booking.notes}</p>}
                     </div>
                     <div className="flex shrink-0 flex-wrap gap-2">
-                        <button type="button" onClick={() => void decide(booking, "confirm")} disabled={busyId !== null || loading}
+                        <button type="button" onClick={() => askDecision(booking, "confirm")} disabled={busyId !== null || loading}
                             className="inline-flex min-h-11 items-center gap-2 rounded-full bg-[#E60023] px-5 text-sm font-semibold text-white hover:bg-[#C9001F] disabled:opacity-50">
                             {busyId === booking._id ? <LoaderCircle size={16} className="animate-spin"/> : <Check size={16}/>} Confirm
                         </button>
-                        <button type="button" onClick={() => void decide(booking, "cancel")} disabled={busyId !== null || loading}
+                        <button type="button" onClick={() => askDecision(booking, "cancel")} disabled={busyId !== null || loading}
                             className="inline-flex min-h-11 items-center gap-2 rounded-full border border-neutral-300 px-5 text-sm font-semibold hover:border-[#E60023] disabled:opacity-50 dark:border-white/20">
                             <X size={16}/> Decline
                         </button>
@@ -127,6 +172,34 @@ export default function HostBookingRequests({ userId }: { userId: string }) {
                     <span>{booking.studioTitle || "Studio"} · {displayDate(booking.date)}</span><span className="font-semibold">{booking.status}</span>
                 </div>)}</div>
             </div>}
+            {confirmation && (
+                <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/70 p-4 backdrop-blur-[3px]" onMouseDown={(event) => { if (event.target === event.currentTarget) closeConfirmation(); }}>
+                    <div id="frame-host-decision-dialog" role="alertdialog" aria-modal="true" aria-labelledby="frame-decision-title" aria-describedby="frame-decision-description" className="w-full max-w-md rounded-2xl border border-neutral-200 bg-white p-6 text-neutral-950 shadow-2xl dark:border-white/15 dark:bg-[#1C1C1C] dark:text-white sm:p-7">
+                        <div className="flex items-start justify-between gap-3">
+                            <div className={`flex h-12 w-12 items-center justify-center rounded-full ${confirmation.decision === "confirm" ? "bg-red-50 text-[#E60023] dark:bg-red-500/15" : "bg-amber-50 text-amber-700 dark:bg-amber-500/15 dark:text-amber-400"}`}>
+                                {confirmation.decision === "confirm" ? <Check size={24} /> : <AlertTriangle size={24} />}
+                            </div>
+                            <button ref={modalCancelRef} type="button" aria-label="Close confirmation" onClick={closeConfirmation} disabled={busyId !== null} className="rounded-full p-2 text-neutral-500 hover:bg-neutral-100 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#E60023] disabled:opacity-50 dark:hover:bg-white/10"><X size={20}/></button>
+                        </div>
+                        <h3 id="frame-decision-title" className="mt-5 text-xl font-bold">{confirmation.decision === "confirm" ? "Confirm booking request?" : "Decline booking request?"}</h3>
+                        <p id="frame-decision-description" className="mt-2 text-sm leading-relaxed text-neutral-600 dark:text-neutral-300">
+                            {confirmation.decision === "confirm" ? "This will confirm the guest's reservation and update its status in Frame." : "This will decline the guest's request and update its status to Cancelled."}
+                        </p>
+                        <div className="mt-5 space-y-1 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm dark:border-white/10 dark:bg-[#151515]">
+                            <p className="font-semibold">{confirmation.booking.studioTitle || "Studio"}</p>
+                            <p className="text-neutral-600 dark:text-neutral-300">{displayDate(confirmation.booking.date)} · {confirmation.booking.startTime}–{confirmation.booking.endTime}</p>
+                            <p className="break-all text-neutral-500 dark:text-neutral-400">{confirmation.booking.userEmail || "Frame member"}</p>
+                        </div>
+                        <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
+                            <button type="button" onClick={closeConfirmation} disabled={busyId !== null} className="inline-flex min-h-12 justify-center items-center rounded-full border border-neutral-300 px-6 text-sm font-semibold hover:border-[#E60023] disabled:opacity-50 dark:border-white/20 dark:hover:border-[#E60023]">Keep pending</button>
+                            <button type="button" onClick={() => void decide()} disabled={busyId !== null} className={`inline-flex min-h-12 justify-center items-center gap-2 rounded-full px-6 text-sm font-semibold text-white disabled:opacity-60 ${confirmation.decision === "confirm" ? "bg-[#E60023] hover:bg-[#C9001F]" : "bg-neutral-800 hover:bg-neutral-950 dark:bg-red-700 dark:hover:bg-red-600"}`}>
+                                {busyId !== null ? <LoaderCircle size={17} className="animate-spin"/> : confirmation.decision === "confirm" ? <Check size={17}/> : <X size={17}/>}
+                                {busyId !== null ? "Updating booking…" : confirmation.decision === "confirm" ? "Yes, confirm booking" : "Yes, decline request"}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </section>
     );
 }
