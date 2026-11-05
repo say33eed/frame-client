@@ -468,7 +468,7 @@ export default function BookingModal({
                                     size={18}
                                     className="animate-spin"
                                 />
-                                Sending Booking Request...
+                                Connecting / Sending Booking Request...
                             </>
                         ) : (
                             <>

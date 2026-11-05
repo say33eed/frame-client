@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeAwareToaster } from "@/components/ThemeAwareToaster";
 
 import Navbar from "@/components/Navbar";
+import ServerConnectionStatus from "@/components/ServerConnectionStatus";
 import { WishlistProvider } from "@/components/wishlist/WishlistProvider";
 import Footer from "@/components/Footer";
 import ThemeToggle from "@/components/ThemeToggle";
@@ -68,6 +69,7 @@ export default function RootLayout({
           {children}
           <Footer />
         </WishlistProvider>
+        <ServerConnectionStatus />
         <ThemeToggle />
         <ThemeAwareToaster />
       </body>

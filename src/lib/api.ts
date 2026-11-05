@@ -23,6 +23,55 @@ function wait(ms: number): Promise<void> {
     return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
+// A single shared readiness check prevents concurrent components from
+// hammering a sleeping Render instance. Never replay mutations after dispatch.
+export const FRAME_CONNECTION_EVENT = "frame:connection";
+type ConnectionPhase = "checking" | "waking" | "ready" | "offline";
+let readyUntil = 0;
+let readinessFlight: Promise<boolean> | null = null;
+
+function reportConnection(phase: ConnectionPhase) {
+    if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent(FRAME_CONNECTION_EVENT, { detail: phase }));
+    }
+}
+
+async function waitUntilReady(): Promise<boolean> {
+    if (Date.now() < readyUntil) return true;
+    if (readinessFlight) return readinessFlight;
+
+    readinessFlight = (async () => {
+        reportConnection("checking");
+        const deadline = Date.now() + 90000;
+        let first = true;
+        while (Date.now() < deadline) {
+            try {
+                const response = await fetch(`${API_URL}/api/health`, {
+                    cache: "no-store",
+                    credentials: "include",
+                    signal: AbortSignal.timeout(8000),
+                });
+                if (response.ok) {
+                    // The backend returns 200 even while MongoDB is unavailable.
+                    // Only proceed when BOTH Express and MongoDB are ready.
+                    const health: unknown = await response.json().catch(() => null);
+                    if (health && typeof health === "object" &&
+                        "database" in health && health.database === "connected") {
+                        readyUntil = Date.now() + 15000;
+                        reportConnection("ready");
+                        return true;
+                    }
+                }
+            } catch { /* Render may still be starting. */ }
+            if (first) { reportConnection("waking"); first = false; }
+            await wait(3000);
+        }
+        reportConnection("offline");
+        return false;
+    })().finally(() => { readinessFlight = null; });
+    return readinessFlight;
+}
+
 export async function apiRequest<T>(
     path: string,
     options: ApiOptions = {}
@@ -54,6 +103,16 @@ export async function apiRequest<T>(
     const url = `${API_URL}${path.startsWith("/") ? path : `/${path}`
         }`;
 
+    // Check availability before issuing JWTs or performing any write.
+    // The health request itself must not recurse into this guard.
+    if (path !== "/api/health" && !(await waitUntilReady())) {
+        return {
+            success: false,
+            message: "Frame services are still starting. Please try again in a moment.",
+            status: 503,
+        };
+    }
+
     // Obtain an HTTPOnly, short-lived JWT from the backend before mutations.
     // Better Auth session cookie is verified by the server; JS never sees the JWT.
     const needsJwt = ["POST", "PUT", "PATCH", "DELETE"].includes(method) &&
@@ -62,25 +121,46 @@ export async function apiRequest<T>(
          path.startsWith("/api/wishlist/"));
 
     if (needsJwt) {
-        try {
-            const authResponse = await fetch(`${API_URL}/api/security/issue`, {
-                method: "POST",
-                credentials: "include",
-                signal: AbortSignal.timeout(timeoutMs),
-            });
-            if (!authResponse.ok) {
+        // Issuing a short-lived security cookie is safe to retry on transient
+        // connection failures. Never retry the subsequent booking mutation.
+        const authDeadline = Date.now() + 90000;
+        while (true) {
+            try {
+                const authResponse = await fetch(`${API_URL}/api/security/issue`, {
+                    method: "POST",
+                    credentials: "include",
+                    signal: AbortSignal.timeout(12000),
+                });
+                if (authResponse.ok) break;
                 const authBody: unknown = await authResponse.json().catch(() => null);
                 const message = authBody && typeof authBody === "object" &&
                     "message" in authBody && typeof authBody.message === "string"
                     ? authBody.message : "Please sign in to continue.";
-                return { success: false, message, status: authResponse.status };
+                // Do not hide authentication failures or authorization errors.
+                if (authResponse.status < 500 || Date.now() >= authDeadline) {
+                    return { success: false, message, status: authResponse.status };
+                }
+            } catch {
+                if (Date.now() >= authDeadline) {
+                    reportConnection("offline");
+                    return {
+                        success: false,
+                        message: "Unable to verify your secure session after waiting for Frame services. Please try again.",
+                        status: 503,
+                    };
+                }
             }
-        } catch {
-            return {
-                success: false,
-                message: "Unable to verify your secure session. Please try again.",
-                status: 503,
-            };
+            readyUntil = 0;
+            reportConnection("waking");
+            // Recheck actual database readiness before another JWT attempt.
+            if (!(await waitUntilReady())) {
+                return {
+                    success: false,
+                    message: "Frame services are still unavailable. Please try again later.",
+                    status: 503,
+                };
+            }
+            await wait(1500);
         }
     }
 
@@ -110,6 +190,8 @@ export async function apiRequest<T>(
                         ? body.message
                         : "This service is temporarily unavailable.";
 
+                if (response.status >= 500) readyUntil = 0;
+
                 // Retry only transient server failures.
                 if (
                     response.status >= 500 &&
@@ -131,6 +213,7 @@ export async function apiRequest<T>(
                 data: body as T,
             };
         } catch (error) {
+            readyUntil = 0;
             if (requestOptions.signal?.aborted) {
                 return {
                     success: false,
@@ -192,6 +275,9 @@ export async function downloadBookingInvoice(bookingId: string): Promise<ApiResu
         return { success: false, message: "Invalid booking reference.", status: 400 };
     }
     try {
+        if (!(await waitUntilReady())) {
+            return { success: false, message: "Frame services are still starting. Please try again.", status: 503 };
+        }
         const response = await fetch(
             `${API_URL}/api/bookings/${encodeURIComponent(bookingId)}/invoice`,
             { method: "GET", credentials: "include", cache: "no-store", signal: AbortSignal.timeout(20000) }
